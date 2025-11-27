@@ -1,10 +1,12 @@
 <Solution>
   <Folder Name="/Backend/">
     <Project Path="FakeID.Api/FakeID.Api.csproj" Id="1df1e708-0d6d-46bd-9c1e-35ae68ddf24e" />
+    <Project Path="FakeID.Application.Test.Unit/FakeID.Application.Test.Unit.csproj" Id="857431c0-00d0-410b-809c-5a7bcb74fbaa" />
     <Project Path="FakeID.Application/FakeID.Application.csproj" Id="1506031c-6c51-45ea-85ee-5f4fd9fc420d" />
     <Project Path="FakeID.Host/FakeID.Host.csproj" Id="f34cf55f-e0f0-4c42-8c97-68292df69c6e" />
   </Folder>
   <Folder Name="/Frontend/">
+    <Project Path="FakeID.Client.Blazor.Test.Unit/FakeID.Client.Blazor.Test.Unit.csproj" Id="62f72633-780b-477f-aebe-bbadb08d6bd7" />
     <Project Path="FakeID.Client.Blazor/FakeID.Client.Blazor.csproj" Id="771b9aa8-48c9-4fbc-8e21-4966158eb885" />
   </Folder>
 </Solution>
