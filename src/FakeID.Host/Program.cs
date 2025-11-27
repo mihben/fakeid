@@ -1,4 +1,5 @@
 using FakeID.Host.Wireup;
+using Serilog;
 using STrain.CQS.NetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Host.UseLightInject();
+
+builder.Logging.AddSerilog(new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger());
 
 builder.Services.AddExceptionHandler().UseDefaultWriters();
 
