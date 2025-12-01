@@ -1,37 +1,18 @@
 ﻿using AutoBogus;
 using FakeID.Api;
 using FakeID.Application.Entities;
-using FakeID.Application.Handlers;
 using FakeID.Application.Test.Unit.Fixtures;
-using Microsoft.Extensions.Logging;
 using STrain.Core.Exceptions;
 
 namespace FakeID.Application.Test.Unit
 {
-    public class CreateClientCommandTest : IClassFixture<DatabaseFixture>, IDisposable
+    public class CreateClientCommandTest : IClassFixture<ClientPerformersFixture>
     {
-        private readonly ILogger<ClientPerformers> _logger;
-        private readonly DatabaseFixture _fixture;
+        private readonly ClientPerformersFixture _fixture;
 
-        public CreateClientCommandTest(DatabaseFixture fixture)
+        public CreateClientCommandTest(ClientPerformersFixture fixture)
         {
-            _logger = LoggerFactory.Create(builder => builder
-                                                        .AddXUnit()
-                                                        .SetMinimumLevel(LogLevel.Trace))
-                                    .CreateLogger<ClientPerformers>();
             _fixture = fixture;
-        }
-
-        public ClientPerformers CreateSUT()
-        {
-            _fixture.OpenConnection();
-
-            return new ClientPerformers(_fixture.CreateContext(), _logger);
-        }
-
-        public void Dispose()
-        {
-            _fixture.CloseConnection();
         }
 
         [Fact(DisplayName = "[UNIT][CCL-001]: Id is empty")]
@@ -67,7 +48,7 @@ namespace FakeID.Application.Test.Unit
         public async Task CreateClientCommand_PerformAsync_CreateClient()
         {
             // Arrange
-            var sut = CreateSUT();
+            var sut = _fixture.CreateSUT();
             var command = new CreateClientCommandFaker().Generate();
 
             // Act
@@ -81,7 +62,7 @@ namespace FakeID.Application.Test.Unit
         public async Task CreateClientCommand_PerformAsync_ClientIsExists()
         {
             // Arrange
-            var sut = CreateSUT();
+            var sut = _fixture.CreateSUT();
             var command = new CreateClientCommandFaker().Generate();
 
             await _fixture.InsertAsync(command.AsEntity());

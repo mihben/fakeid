@@ -7,7 +7,8 @@ using STrain;
 
 namespace FakeID.Application.Handlers
 {
-    public class ClientPerformers : ICommandPerformer<CreateClientCommand>
+    public class ClientPerformers : IQueryPerformer<GetClientsQuery, IEnumerable<GetClientsQuery.Result>>,
+        ICommandPerformer<CreateClientCommand>
     {
         private readonly ApplicationContext _context;
         private readonly ILogger<ClientPerformers> _logger;
@@ -16,6 +17,15 @@ namespace FakeID.Application.Handlers
         {
             _context = context;
             _logger = logger;
+        }
+
+
+        public async Task<IEnumerable<GetClientsQuery.Result>> PerformAsync(GetClientsQuery query, CancellationToken cancellationToken)
+        {
+            _logger.LogDebug("Querying clients");
+            var entities = await _context.Clients.ToListAsync(cancellationToken);
+
+            return entities.ConvertAll(e => new GetClientsQuery.Result { Id = e.Id, Name = e.Name });
         }
 
         public async Task PerformAsync(CreateClientCommand command, CancellationToken cancellationToken)

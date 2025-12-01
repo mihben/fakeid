@@ -18,9 +18,20 @@ div.clients__data{
     grid-row-gap: .6rem;
 }
 
-div.client__container {
-}
-
 tr.client--selected {
     background-color: lightblue;
+}
+
+div.client__content {
+    display: grid;
+    grid-template-columns: 1fr max-content max-content;
+    column-gap: .4rem;
+
+    height: max-content;
+
+    align-items: center;
+}
+
+.client__icon:has(:hover) {
+    background-color: red; 
 }

@@ -96,6 +96,8 @@ html, body {
 
 td {
     box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+
+    height: fit-content !important;
 }
 
 div {
@@ -160,4 +162,26 @@ span.field__validation_message {
 
     span.field__validation_message:after {
         content: ')'
+    }
+
+.icon_button {
+    border-radius: 1rem;
+}
+
+
+.icon_button--danger > svg {
+    fill: var(--error) !important;
+}
+
+    .icon_button::part(control) {
+        border: none;
+        background: none;
+    }
+
+    .icon_button::part(control):hover {
+        background-color: rgba(0, 0, 255, .05);
+    }
+
+    .icon_button--danger::part(control):hover {
+        background-color: rgba(255, 0, 0, .05);
     }

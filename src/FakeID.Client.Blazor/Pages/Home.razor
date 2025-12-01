@@ -3,6 +3,8 @@
 @using FakeID.Client.Blazor.Services
 @using Microsoft.FluentUI.AspNetCore.Components
 @using STrain
+@using System.Threading.Tasks
+@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
 
 @inject IDialogService DialogService;
 @inject IClientDataService dataService;
@@ -24,14 +26,24 @@
                 <SelectColumn TGridItem="Models.Client" SelectMode="DataGridSelectMode.SingleSticky" 
                               SelectFromEntireRow="true" Property="@(c => c.Selected)"
                               OnSelect="@(c => c.Item.Selected = c.Selected)" Width="0px" Style="display: none"></SelectColumn>
-                <PropertyColumn Property="@(c => c.Name)" Sortable="true"></PropertyColumn>
+                <TemplateColumn>
+                    <div class="client__content">
+                        <span>@context.Name</span>
+                        <FluentButton Class="icon_button">
+                            <FluentIcon Value="@(new Icons.Regular.Size12.Edit())" />
+                        </FluentButton>
+                        <FluentButton Class="icon_button icon_button--danger">
+                            <FluentIcon Value="@(new Icons.Regular.Size12.Delete())"/>
+                        </FluentButton>
+                    </div>
+                </TemplateColumn>
             </FluentDataGrid>
 
             <FluentButton Appearance="Appearance.Accent" OnClick="@AddNewClientAsync">Add New Client</FluentButton>
         </div>
     </div>
     <div class="container">
-
+        <p>@_filteredClients.SingleOrDefault(c => c.Selected)?.Name</p>
     </div>
 </div>
 
@@ -41,17 +53,16 @@
 
     private string? _criteria = null;
 
-    private List<Models.Client> _clients = new List<Models.Client>();
-
     private IEnumerable<Models.Client> _filteredClients = Enumerable.Empty<Models.Client>();
 
     private Models.Client? _client = null;
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            _filteredClients = _clients;
+            await dataService.LoadAsync(CancellationToken.None);
+            _filteredClients = dataService.Clients;
             StateHasChanged();
         }
         base.OnAfterRender(firstRender);
@@ -60,8 +71,8 @@
 
     private void Search()
     {
-        if (string.IsNullOrWhiteSpace(_criteria)) _filteredClients = _clients;
-        else _filteredClients = _clients.Where(c => c.Name is not null && c.Name.ToLowerInvariant().StartsWith(_criteria.ToLowerInvariant()));
+        if (string.IsNullOrWhiteSpace(_criteria)) _filteredClients = dataService.Clients;
+        else _filteredClients = dataService.Clients.Where(c => c.Name is not null && c.Name.ToLowerInvariant().StartsWith(_criteria.ToLowerInvariant()));
     }
 
     private async Task AddNewClientAsync()
@@ -77,8 +88,7 @@
         var data = (Models.Client)result.Data!;
 
         await dataService.SaveAsync(data, CancellationToken.None);
-
-        _clients.Add(data);
-        data.Selected = true;
+        await dataService.LoadAsync(CancellationToken.None);
+        Search();
     }
 }
