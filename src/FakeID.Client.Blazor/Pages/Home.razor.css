@@ -18,6 +18,12 @@ div.clients__data{
     grid-row-gap: .6rem;
 }
 
+div.clients__header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-column-gap: .2rem;
+}
+
 tr.client--selected {
     background-color: lightblue;
 }

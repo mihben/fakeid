@@ -18,11 +18,19 @@
         <span class="title">Clients</span>
 
         <div class="clients__data">
-            <FluentSearch Placeholder="Search for client" AutoComplete="off"
-                          @bind-Value="@_criteria" @bind-Value:after="Search"
-                          Immediate="true" ImmediateDelay="100"></FluentSearch>
+            <div class="clients__header">
+                <FluentSearch Placeholder="Search for client" AutoComplete="off"
+                              @bind-Value="@_criteria" @bind-Value:after="Search"
+                              Immediate="true" ImmediateDelay="100"></FluentSearch>
+                @if (_ascending) {
+                    <FluentButton IconEnd="new Icons.Regular.Size20.TextSortAscending()" OnClick="@ChangeOrder"></FluentButton>
+                }
+                else {
+                    <FluentButton IconEnd="new Icons.Regular.Size20.TextSortDescending()" OnClick="@ChangeOrder"></FluentButton>
+                }
+            </div>
 
-            <FluentDataGrid Items="@_filteredClients.AsQueryable()" ShowHover="true" GenerateHeader="GenerateHeaderOption.None" Loading="_loading">
+            <FluentDataGrid Items="@GetClients()" ShowHover="true" GenerateHeader="GenerateHeaderOption.None">
                 <SelectColumn TGridItem="Models.Client" SelectMode="DataGridSelectMode.SingleSticky" Property="c => dataService.Selected?.Id == c.Id"
                               SelectFromEntireRow="true" OnSelect="@(c => dataService.Selected = c.Item)" Width="0px" Style="display: none"></SelectColumn>
                 <TemplateColumn>
@@ -47,7 +55,7 @@
 
 
 @code {
-    private bool _loading = false;
+    private bool _ascending = true;
 
     private string? _criteria = null;
 
@@ -113,5 +121,16 @@
     {
         await dataService.DeleteAsync(CancellationToken.None);
         Search();
+    }
+
+    private void ChangeOrder()
+    {
+        _ascending = !_ascending;
+    }
+
+    private IQueryable<Models.Client> GetClients()
+    {
+        if (_ascending) return _filteredClients.OrderBy(c => c.Name).AsQueryable();
+        else return _filteredClients.OrderByDescending(c => c.Name).AsQueryable();
     }
 }
