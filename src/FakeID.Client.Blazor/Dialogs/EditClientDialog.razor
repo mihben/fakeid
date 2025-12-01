@@ -1,6 +1,9 @@
-﻿@using Microsoft.FluentUI.AspNetCore.Components
+﻿@using FakeID.Client.Blazor.Extensions
+@using FakeID.Client.Blazor.Services
+@using Microsoft.FluentUI.AspNetCore.Components
 
 @implements IDialogContentComponent<Models.Client>
+@inject IClientDataService DataService
 
 <FluentDialogHeader ShowDismiss="false">
     <span class="title">Edit Client</span>
@@ -20,10 +23,10 @@
 
 <FluentDialogFooter>
     <FluentButton Appearance="Appearance.Neutral" OnClick="@CancelAsync">Cancel</FluentButton>
-    <FluentButton Appearance="Appearance.Accent" OnClick="@SaveAsync">Save</FluentButton>
+    <FluentButton Appearance="Appearance.Accent" OnClick="@SaveAsync" Disabled="@_editContext.IsValid()">Save</FluentButton>
 </FluentDialogFooter>
 
-                    @code {
+@code {
     private EditContext? _editContext;
     private ValidationMessageStore? _messages;
 
@@ -40,6 +43,8 @@
         _editContext.OnFieldChanged += HandleFieldChanged;
         _editContext.OnValidationStateChanged += HandleValidationStateChanged;
         _messages = new(_editContext);
+
+        _editContext.Validate();
     }
 
     private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs args)
@@ -47,6 +52,7 @@
         _messages?.Clear();
 
         if (string.IsNullOrEmpty(Content.Name)) _messages!.Add(() => Content.Name, "Name is required");
+        if (DataService.Clients.Any(c => c.Name == Content.Name)) _messages!.Add(() => Content.Name, "Client has already been added");
     }
 
     private void HandleFieldChanged(object? sender, FieldChangedEventArgs args)
