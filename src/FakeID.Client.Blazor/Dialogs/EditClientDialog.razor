@@ -1,0 +1,85 @@
+﻿@using Microsoft.FluentUI.AspNetCore.Components
+
+@implements IDialogContentComponent<Models.Client>
+
+<FluentDialogHeader ShowDismiss="false">
+    <span class="title">Edit Client</span>
+</FluentDialogHeader>
+
+<FluentDialogBody>
+    <EditForm EditContext="_editContext">
+        <div class="field__container" required invalid="@IsInvalid(_editContext?.Field(nameof(Content.Name)))">
+            <div class="label__container">
+                <span>Name</span>
+                <span class="field__validation_message">@GetValidationMessae(_editContext?.Field(nameof(Content.Name)))</span>
+            </div>
+            <FluentTextField Class="client__name" @bind-Value="@Content.Name" Required Autofocus="true" Immediate="true" ImmediateDelay="200"></FluentTextField>
+        </div>
+    </EditForm>
+</FluentDialogBody>
+
+<FluentDialogFooter>
+    <FluentButton Appearance="Appearance.Neutral" OnClick="@CancelAsync">Cancel</FluentButton>
+    <FluentButton Appearance="Appearance.Accent" OnClick="@SaveAsync">Save</FluentButton>
+</FluentDialogFooter>
+
+                    @code {
+    private EditContext? _editContext;
+    private ValidationMessageStore? _messages;
+
+    [Parameter]
+    public required Models.Client Content { get; set; }
+
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        _editContext = new(Content);
+        _editContext.OnValidationRequested += HandleValidationRequested;
+        _editContext.OnFieldChanged += HandleFieldChanged;
+        _editContext.OnValidationStateChanged += HandleValidationStateChanged;
+        _messages = new(_editContext);
+    }
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs args)
+    {
+        _messages?.Clear();
+
+        if (string.IsNullOrEmpty(Content.Name)) _messages!.Add(() => Content.Name, "Name is required");
+    }
+
+    private void HandleFieldChanged(object? sender, FieldChangedEventArgs args)
+    {
+        _editContext?.Validate();
+        _editContext?.NotifyValidationStateChanged();
+    }
+
+    private void HandleValidationStateChanged(object? sender, ValidationStateChangedEventArgs args)
+    {
+        Console.WriteLine("HandleValidationStateChanged");
+        StateHasChanged();
+    }
+
+    private bool IsInvalid(FieldIdentifier? field)
+    {
+        if (field is null) return false;
+        return _editContext is not null && !_editContext.IsValid(field.Value);
+    }
+
+    private string? GetValidationMessae(FieldIdentifier? field)
+    {
+        if (field is null) return null;
+        return _editContext?.GetValidationMessages(field.Value).FirstOrDefault();
+    }
+
+    private async Task SaveAsync()
+    {
+        await Dialog.CloseAsync(Content);
+    }
+
+    private async Task CancelAsync()
+    {
+        await Dialog.CancelAsync();
+    }
+}

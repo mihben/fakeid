@@ -1,4 +1,7 @@
-﻿using STrain.CQS.NetCore.Builders;
+﻿using FakeID.Api;
+using FakeID.Application.Handlers;
+using STrain;
+using STrain.CQS.NetCore.Builders;
 
 namespace FakeID.Host.Wireup
 {
@@ -10,7 +13,9 @@ namespace FakeID.Host.Wireup
                 .AddMvcRequestReceiver();
 
             builder.AddRequestValidator()
-                .UseFluentRequestValidator(builder => { });
+                .UseFluentRequestValidator(builder => builder.RegistrateFrom<CreateClientCommandValidator>());
+
+            builder.AddPerformer<ICommandPerformer<CreateClientCommand>, ClientPerformers>();
         }
     }
 }

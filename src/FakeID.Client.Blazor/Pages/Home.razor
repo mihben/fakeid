@@ -1,7 +1,84 @@
-﻿@page "/"
+﻿@using FakeID.Api
+@using FakeID.Client.Blazor.Dialogs
+@using FakeID.Client.Blazor.Services
+@using Microsoft.FluentUI.AspNetCore.Components
+@using STrain
 
-<PageTitle>Home</PageTitle>
+@inject IDialogService DialogService;
+@inject IClientDataService dataService;
 
-<h1>Hello, world!</h1>
+@page "/"
 
-Welcome to your new app.
+<PageTitle>Clients</PageTitle>
+
+<div class="content">
+    <div class="container clients__container">
+        <span class="title">Clients</span>
+
+        <div class="clients__data">
+            <FluentSearch Placeholder="Search for client" AutoComplete="off"
+                          @bind-Value="@_criteria" @bind-Value:after="Search"
+                          Immediate="true" ImmediateDelay="100"></FluentSearch>
+
+            <FluentDataGrid Items="@_filteredClients.AsQueryable()" ShowHover="true" GenerateHeader="GenerateHeaderOption.None" Loading="_loading">
+                <SelectColumn TGridItem="Models.Client" SelectMode="DataGridSelectMode.SingleSticky" 
+                              SelectFromEntireRow="true" Property="@(c => c.Selected)"
+                              OnSelect="@(c => c.Item.Selected = c.Selected)" Width="0px" Style="display: none"></SelectColumn>
+                <PropertyColumn Property="@(c => c.Name)" Sortable="true"></PropertyColumn>
+            </FluentDataGrid>
+
+            <FluentButton Appearance="Appearance.Accent" OnClick="@AddNewClientAsync">Add New Client</FluentButton>
+        </div>
+    </div>
+    <div class="container">
+
+    </div>
+</div>
+
+
+@code {
+    private bool _loading = false;
+
+    private string? _criteria = null;
+
+    private List<Models.Client> _clients = new List<Models.Client>();
+
+    private IEnumerable<Models.Client> _filteredClients = Enumerable.Empty<Models.Client>();
+
+    private Models.Client? _client = null;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _filteredClients = _clients;
+            StateHasChanged();
+        }
+        base.OnAfterRender(firstRender);
+
+    }
+
+    private void Search()
+    {
+        if (string.IsNullOrWhiteSpace(_criteria)) _filteredClients = _clients;
+        else _filteredClients = _clients.Where(c => c.Name is not null && c.Name.ToLowerInvariant().StartsWith(_criteria.ToLowerInvariant()));
+    }
+
+    private async Task AddNewClientAsync()
+    {
+        var dialog = await DialogService.ShowDialogAsync<EditClientDialog>(new Models.Client() { Id = Guid.NewGuid() }, new DialogParameters
+        {
+            PreventDismissOnOverlayClick = true
+        });
+
+        var result = await dialog.Result;
+        if (result.Cancelled) return;
+
+        var data = (Models.Client)result.Data!;
+
+        await dataService.SaveAsync(data, CancellationToken.None);
+
+        _clients.Add(data);
+        data.Selected = true;
+    }
+}

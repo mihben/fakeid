@@ -87,3 +87,77 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+
+html, body {
+    height: 100%;
+    margin: 0px;
+}
+
+td {
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+}
+
+div {
+    height: 100%;
+
+    box-sizing: border-box;
+}
+
+    div.container {
+        box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+        border-radius: 4px;
+        padding: .4rem;
+    }
+
+.fluent-data-grid-row:has([row-selected]) > td {
+    background-color: lightsteelblue;
+    font-weight: bold;
+}
+
+.title {
+    font-size: 1.4rem;
+    font-weight: bold;
+
+    justify-self: center;
+}
+
+fluent-text-field {
+    width: 100%;
+}
+
+div.field__container {
+    display: grid;
+    grid-template-rows: max-content 1fr;
+    grid-row-gap: .2rem;
+}
+
+    div.field__container[invalid] > div > span.field__validation_message {
+        visibility: visible;
+    }
+
+    div.field__container[required] > div > span:not(.field__validation_message) {
+        font-weight: bold;
+    }
+
+div.label__container {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    grid-column-gap: .2rem;
+
+    align-items: center;
+}
+
+span.field__validation_message {
+    color: red;
+    font-size: .9rem;
+    visibility: collapse;
+}
+
+    span.field__validation_message:before {
+        content: '('
+    }
+
+    span.field__validation_message:after {
+        content: ')'
+    }
