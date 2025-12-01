@@ -7,16 +7,19 @@ namespace FakeID.Client.Blazor.Services
     public interface IClientDataService
     {
         IEnumerable<Models.Client> Clients { get; }
+        Models.Client? Selected { get; set; }
 
         Task LoadAsync(CancellationToken cancellationToken);
         Task SaveAsync(Models.Client client, CancellationToken cancellationToken);
+        Task DeleteAsync(CancellationToken cancellationToken);
     }
 
     public class ClientDataService : IClientDataService
     {
         private readonly IRequestSender _sender;
 
-        public IEnumerable<Models.Client> Clients { get; private set; } = Enumerable.Empty<Models.Client>();
+        public IEnumerable<Models.Client> Clients { get; private set; } = [];
+        public Models.Client? Selected { get; set; }
 
         public ClientDataService(IRequestSender sender)
         {
@@ -31,14 +34,26 @@ namespace FakeID.Client.Blazor.Services
             Clients = result.Select(r => new Models.Client
             {
                 Id = r.Id,
-                Name = r.Name,
-                Selected = false
+                Name = r.Name
             });
         }
 
         public async Task SaveAsync(Models.Client client, CancellationToken cancellationToken)
         {
             await _sender.SendAsync(new CreateClientCommand { Id = client.Id, Name = client.Name! }, cancellationToken);
+            await LoadAsync(cancellationToken);
+
+            Selected = Clients.SingleOrDefault(c => c.Id.Equals(client.Id));
+        }
+
+        public async Task DeleteAsync(CancellationToken cancellationToken)
+        {
+            if (Selected is null) return;
+
+            await _sender.SendAsync(new DeleteClientCommand { Id = Selected.Id }, cancellationToken);
+            await LoadAsync(cancellationToken);
+
+            Selected = null;
         }
     }
 }

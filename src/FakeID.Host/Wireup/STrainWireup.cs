@@ -15,8 +15,9 @@ namespace FakeID.Host.Wireup
             builder.AddRequestValidator()
                 .UseFluentRequestValidator(builder => builder.RegistrateFrom<CreateClientCommandValidator>());
 
-            builder.AddPerformer<ICommandPerformer<CreateClientCommand>, ClientPerformers>();
             builder.AddPerformer<IQueryPerformer<GetClientsQuery, IEnumerable<GetClientsQuery.Result>>, ClientPerformers>();
+            builder.AddPerformer<ICommandPerformer<CreateClientCommand>, ClientPerformers>();
+            builder.AddPerformer<ICommandPerformer<DeleteClientCommand>, ClientPerformers>();
         }
     }
 }

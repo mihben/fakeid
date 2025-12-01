@@ -23,16 +23,15 @@
                           Immediate="true" ImmediateDelay="100"></FluentSearch>
 
             <FluentDataGrid Items="@_filteredClients.AsQueryable()" ShowHover="true" GenerateHeader="GenerateHeaderOption.None" Loading="_loading">
-                <SelectColumn TGridItem="Models.Client" SelectMode="DataGridSelectMode.SingleSticky" 
-                              SelectFromEntireRow="true" Property="@(c => c.Selected)"
-                              OnSelect="@(c => c.Item.Selected = c.Selected)" Width="0px" Style="display: none"></SelectColumn>
+                <SelectColumn TGridItem="Models.Client" SelectMode="DataGridSelectMode.SingleSticky" Property="c => dataService.Selected == c"
+                              SelectFromEntireRow="true" OnSelect="@(c => dataService.Selected = c.Item)" Width="0px" Style="display: none"></SelectColumn>
                 <TemplateColumn>
                     <div class="client__content">
                         <span>@context.Name</span>
                         <FluentButton Class="icon_button">
                             <FluentIcon Value="@(new Icons.Regular.Size12.Edit())" />
                         </FluentButton>
-                        <FluentButton Class="icon_button icon_button--danger">
+                        <FluentButton Class="icon_button icon_button--danger" OnClick="@DeleteAsync">
                             <FluentIcon Value="@(new Icons.Regular.Size12.Delete())"/>
                         </FluentButton>
                     </div>
@@ -43,7 +42,6 @@
         </div>
     </div>
     <div class="container">
-        <p>@_filteredClients.SingleOrDefault(c => c.Selected)?.Name</p>
     </div>
 </div>
 
@@ -73,6 +71,8 @@
     {
         if (string.IsNullOrWhiteSpace(_criteria)) _filteredClients = dataService.Clients;
         else _filteredClients = dataService.Clients.Where(c => c.Name is not null && c.Name.ToLowerInvariant().StartsWith(_criteria.ToLowerInvariant()));
+
+        dataService.Selected = _filteredClients.FirstOrDefault();
     }
 
     private async Task AddNewClientAsync()
@@ -88,7 +88,12 @@
         var data = (Models.Client)result.Data!;
 
         await dataService.SaveAsync(data, CancellationToken.None);
-        await dataService.LoadAsync(CancellationToken.None);
+        Search();
+    }
+
+    private async Task DeleteAsync()
+    {
+        await dataService.DeleteAsync(CancellationToken.None);
         Search();
     }
 }

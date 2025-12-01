@@ -8,7 +8,8 @@ using STrain;
 namespace FakeID.Application.Handlers
 {
     public class ClientPerformers : IQueryPerformer<GetClientsQuery, IEnumerable<GetClientsQuery.Result>>,
-        ICommandPerformer<CreateClientCommand>
+        ICommandPerformer<CreateClientCommand>,
+        ICommandPerformer<DeleteClientCommand>
     {
         private readonly ApplicationContext _context;
         private readonly ILogger<ClientPerformers> _logger;
@@ -41,6 +42,34 @@ namespace FakeID.Application.Handlers
                 await _context.Clients.AddAsync(new ClientEntity { Id = command.Id, Name = command.Name }, cancellationToken).ConfigureAwait(false);
                 await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+                throw;
+            }
+        }
+
+        public async Task PerformAsync(DeleteClientCommand command, CancellationToken cancellationToken)
+        {
+            _logger.LogDebug("Deleting {Client} client", command.Id);
+
+            await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                var entity = await _context.Clients.FindAsync(command.Id).ConfigureAwait(false);
+                if (entity is null)
+                {
+                    _logger.LogDebug("{Client} client was not found", command.Id);
+                    await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+                    return;
+                }
+
+                _context.Remove(entity);
+
+                await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             }
             catch

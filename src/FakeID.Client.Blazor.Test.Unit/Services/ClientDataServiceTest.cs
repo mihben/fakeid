@@ -34,7 +34,7 @@ namespace FakeID.Client.Blazor.Test.Unit.Services
 
         }
 
-        [Fact(DisplayName = "[UNIT][CDS-001] - Load Clients")]
+        [Fact(DisplayName = "[UNIT][CDS-002] - Load Clients")]
         public async Task ClientDataService_LoadAsync_LoadClients()
         {
             // Arrange
@@ -49,6 +49,22 @@ namespace FakeID.Client.Blazor.Test.Unit.Services
 
             // Assert
             Assert.Collection(sut.Clients, [.. clients.AsInspectors()]);
+        }
+
+        [Fact(DisplayName = "[UNIT][CDS-003] - Delete Client")]
+        public async Task ClientDataService_LoadAsync_DeleteClient()
+        {
+            // Arrange
+            var sut = CreateSUT();
+            var client = new AutoFaker<Models.Client>().Generate();
+
+            sut.Selected = client;
+
+            // Act
+            await sut.DeleteAsync(default);
+
+            // Assert
+            _senderMock.VerifyCommand<DeleteClientCommand>(c => c.Id == client.Id);
         }
     }
 
