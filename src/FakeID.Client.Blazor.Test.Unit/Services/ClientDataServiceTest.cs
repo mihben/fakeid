@@ -19,8 +19,8 @@ namespace FakeID.Client.Blazor.Test.Unit.Services
             return new ClientDataService(_senderMock.Object);
         }
 
-        [Fact(DisplayName = "[UNIT][CDS-001] - Save client")]
-        public async Task ClientDataService_SaveAsync_SaveClient()
+        [Fact(DisplayName = "[UNIT][CDS-001] - Create client")]
+        public async Task ClientDataService_SaveAsync_CreateClient()
         {
             // Arrange
             var sut = CreateSUT();
@@ -31,7 +31,6 @@ namespace FakeID.Client.Blazor.Test.Unit.Services
 
             // Assert
             _senderMock.VerifyCommand<CreateClientCommand>(c => c.Id == client.Id && c.Name == client.Name);
-
         }
 
         [Fact(DisplayName = "[UNIT][CDS-002] - Load Clients")]
@@ -66,6 +65,25 @@ namespace FakeID.Client.Blazor.Test.Unit.Services
             // Assert
             _senderMock.VerifyCommand<DeleteClientCommand>(c => c.Id == client.Id);
         }
+
+        [Fact(DisplayName = "[UNIT][CDS-004] - Update client")]
+        public async Task ClientDataService_SaveAsync_UpdateClient()
+        {
+            // Arrange
+            var sut = CreateSUT();
+            var client = new AutoFaker<Models.Client>().Generate();
+
+            _senderMock.SetupQuery<GetClientsQuery, IEnumerable<GetClientsQuery.Result>>()
+                .ReturnsAsync([client.AsResult()]);
+
+            await sut.LoadAsync(default);
+
+            // Act
+            await sut.SaveAsync(client, default);
+
+            // Assert
+            _senderMock.VerifyCommand<UpdateClientCommand>(c => c.Id == client.Id && c.Name == client.Name);
+        }
     }
 
     file static class ClientDataServiceTestExtensions
@@ -92,6 +110,11 @@ namespace FakeID.Client.Blazor.Test.Unit.Services
                     Assert.Equal(result.Name, c.Name);
                 };
             }
+        }
+
+        public static GetClientsQuery.Result AsResult(this Models.Client client)
+        {
+            return new GetClientsQuery.Result { Id = client.Id, Name = client.Name! };
         }
     }
 }

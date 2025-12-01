@@ -55,7 +55,7 @@ namespace FakeID.Application.Test.Unit
             await sut.PerformAsync(command, CancellationToken.None);
 
             // Assert
-            Assert.Collection(await _fixture.GetClientsAsync(), c => ClientAssert.Equal(command, c));
+            Assert.Collection(await _fixture.GetAsync(), c => ClientAssert.Equal(command, c));
         }
 
         [Fact(DisplayName = "[UNIT][CCL-004]: Client has been created")]

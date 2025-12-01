@@ -52,7 +52,7 @@
         _messages?.Clear();
 
         if (string.IsNullOrEmpty(Content.Name)) _messages!.Add(() => Content.Name, "Name is required");
-        if (DataService.Clients.Any(c => c.Name == Content.Name)) _messages!.Add(() => Content.Name, "Client has already been added");
+        if (DataService.Clients.Any(c => c.Id != Content.Id && c.Name == Content.Name)) _messages!.Add(() => Content.Name, "Client has already been added");
     }
 
     private void HandleFieldChanged(object? sender, FieldChangedEventArgs args)

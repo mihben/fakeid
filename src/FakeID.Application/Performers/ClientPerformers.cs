@@ -9,6 +9,7 @@ namespace FakeID.Application.Handlers
 {
     public class ClientPerformers : IQueryPerformer<GetClientsQuery, IEnumerable<GetClientsQuery.Result>>,
         ICommandPerformer<CreateClientCommand>,
+        ICommandPerformer<UpdateClientCommand>,
         ICommandPerformer<DeleteClientCommand>
     {
         private readonly ApplicationContext _context;
@@ -51,6 +52,32 @@ namespace FakeID.Application.Handlers
             }
         }
 
+        public async Task PerformAsync(UpdateClientCommand command, CancellationToken cancellationToken)
+        {
+            _logger.LogDebug("Updating {Client} client", command.Id);
+
+            if (await _context.Clients.AnyAsync(c => c.Name == command.Name)) throw Exceptions.Clients.AlreadyExist(command.Name);
+
+            await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                var entity = await _context.Clients.FindAsync([command.Id], cancellationToken: cancellationToken).ConfigureAwait(false);
+
+                if (entity is null) throw Exceptions.Clients.NotFound;
+
+                entity.Name = command.Name;
+
+                await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+                throw;
+            }
+        }
+
         public async Task PerformAsync(DeleteClientCommand command, CancellationToken cancellationToken)
         {
             _logger.LogDebug("Deleting {Client} client", command.Id);
@@ -59,7 +86,7 @@ namespace FakeID.Application.Handlers
 
             try
             {
-                var entity = await _context.Clients.FindAsync(command.Id).ConfigureAwait(false);
+                var entity = await _context.Clients.FindAsync([command.Id], cancellationToken: cancellationToken).ConfigureAwait(false);
                 if (entity is null)
                 {
                     _logger.LogDebug("{Client} client was not found", command.Id);

@@ -41,7 +41,7 @@ namespace FakeID.Application.Test.Unit
             await sut.PerformAsync(new DeleteClientCommand { Id = client.Id }, CancellationToken.None);
 
             // Assert
-            Assert.Empty(await _fixture.GetClientsAsync());
+            Assert.Empty(await _fixture.GetAsync());
         }
 
         [Fact(DisplayName = "[UNIT][DCC-003] - Client does not exist")]

@@ -6,6 +6,8 @@ namespace FakeID.Application
     {
         public static class Clients
         {
+            public static NotFoundException NotFound = new("Client does not exist");
+
             public static VerificationException AlreadyExist(string name)
             {
                 return new VerificationException("CLI001", "Already Exists", $"Client with name {name} has already been created");

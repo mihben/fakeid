@@ -23,12 +23,12 @@
                           Immediate="true" ImmediateDelay="100"></FluentSearch>
 
             <FluentDataGrid Items="@_filteredClients.AsQueryable()" ShowHover="true" GenerateHeader="GenerateHeaderOption.None" Loading="_loading">
-                <SelectColumn TGridItem="Models.Client" SelectMode="DataGridSelectMode.SingleSticky" Property="c => dataService.Selected == c"
+                <SelectColumn TGridItem="Models.Client" SelectMode="DataGridSelectMode.SingleSticky" Property="c => dataService.Selected?.Id == c.Id"
                               SelectFromEntireRow="true" OnSelect="@(c => dataService.Selected = c.Item)" Width="0px" Style="display: none"></SelectColumn>
                 <TemplateColumn>
                     <div class="client__content">
                         <span>@context.Name</span>
-                        <FluentButton Class="icon_button">
+                        <FluentButton Class="icon_button" OnClick="@EditClientAsync">
                             <FluentIcon Value="@(new Icons.Regular.Size12.Edit())" />
                         </FluentButton>
                         <FluentButton Class="icon_button icon_button--danger" OnClick="@DeleteAsync">
@@ -78,6 +78,24 @@
     private async Task AddNewClientAsync()
     {
         var dialog = await DialogService.ShowDialogAsync<EditClientDialog>(new Models.Client() { Id = Guid.NewGuid() }, new DialogParameters
+        {
+            PreventDismissOnOverlayClick = true
+        });
+
+        var result = await dialog.Result;
+        if (result.Cancelled) return;
+
+        var data = (Models.Client)result.Data!;
+
+        await dataService.SaveAsync(data, CancellationToken.None);
+        Search();
+    }
+
+    private async Task EditClientAsync()
+    {
+        if (dataService.Selected is null) return;
+
+        var dialog = await DialogService.ShowDialogAsync<EditClientDialog>(dataService.Selected, new DialogParameters
         {
             PreventDismissOnOverlayClick = true
         });

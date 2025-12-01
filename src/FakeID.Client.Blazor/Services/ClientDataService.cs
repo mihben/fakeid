@@ -40,9 +40,12 @@ namespace FakeID.Client.Blazor.Services
 
         public async Task SaveAsync(Models.Client client, CancellationToken cancellationToken)
         {
-            await _sender.SendAsync(new CreateClientCommand { Id = client.Id, Name = client.Name! }, cancellationToken);
+            if (Clients.Any(c => c.Id == client.Id)) await _sender.SendAsync(new UpdateClientCommand { Id = client.Id, Name = client.Name! }, cancellationToken);
+            else await _sender.SendAsync(new CreateClientCommand { Id = client.Id, Name = client.Name! }, cancellationToken);
+
             await LoadAsync(cancellationToken);
 
+            Selected = null;
             Selected = Clients.SingleOrDefault(c => c.Id.Equals(client.Id));
         }
 
