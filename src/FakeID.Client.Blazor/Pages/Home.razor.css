@@ -41,3 +41,52 @@ div.client__content {
 .client__icon:has(:hover) {
     background-color: red; 
 }
+
+span.personas__message {
+    justify-self: center;
+    align-self: center;
+
+    font-size: 1.6rem;
+    font-weight: bold;
+}
+
+div.container {
+    display: grid;
+}
+
+div.personas--not-selected {
+    display: grid;
+    grid-template-rows: max-content max-content;
+    row-gap: .4rem;
+
+    align-content: center;
+    justify-items: center;
+}
+
+div.personas__container {
+    display: grid;
+    grid-template-rows: min-content 1fr;
+    row-gap: 1.2rem;
+
+    justify-items: center;
+}
+
+span.personas__title {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+div.personas {
+    display: grid;
+    grid-auto-rows: min-content;
+    grid-auto-flow: row;
+    row-gap: .4rem;
+
+    padding: .2rem;
+
+    justify-items: center;
+
+    overflow: auto;
+
+    row-gap: .4rem;
+}

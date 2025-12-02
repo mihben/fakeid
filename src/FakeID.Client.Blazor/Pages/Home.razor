@@ -1,10 +1,12 @@
 ﻿@using FakeID.Api
+@using FakeID.Client.Blazor.Components
 @using FakeID.Client.Blazor.Dialogs
 @using FakeID.Client.Blazor.Services
 @using Microsoft.FluentUI.AspNetCore.Components
 @using STrain
 @using System.Threading.Tasks
 @using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
+@using Emojis = Microsoft.FluentUI.AspNetCore.Components.Emojis
 
 @inject IDialogService DialogService;
 @inject IClientDataService dataService;
@@ -50,6 +52,32 @@
         </div>
     </div>
     <div class="container">
+        @if (dataService.Selected is null)
+        {
+            <div class="personas--not-selected">
+                <FluentEmoji Value="@(new Emojis.PeopleBody.Color.Light.ManShrugging())" Width="96px"/>
+                <span class="personas__message">Select a client to display personas</span>             
+            </div>
+        }
+        else
+        {
+            <div class="personas__container">
+                <span class="personas__title">@dataService.Selected.Name</span>
+
+                <div class="personas">
+                    <PersonaComponent></PersonaComponent>
+                    <PersonaComponent></PersonaComponent>
+                    <PersonaComponent></PersonaComponent>
+                    <PersonaComponent></PersonaComponent>
+                    <PersonaComponent></PersonaComponent>
+                    <PersonaComponent></PersonaComponent>
+                    <PersonaComponent></PersonaComponent>
+                    <PersonaComponent></PersonaComponent>
+                    <PersonaComponent></PersonaComponent>
+                    <PersonaComponent></PersonaComponent>
+                </div>
+            </div>
+        }
     </div>
 </div>
 

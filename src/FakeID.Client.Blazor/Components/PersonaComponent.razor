@@ -1,0 +1,52 @@
+﻿@using Microsoft.FluentUI.AspNetCore.Components
+@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
+
+<div class="persona__container">  
+    <span class="persona__title">Persona Detail</span>
+
+    <div class="persona__data">
+        <div class="persona__name">
+            <div class="field__container" required>
+                <div class="label__container">
+                    <span>First Name</span>
+                    <span class="field__validation_message"></span>
+                </div>
+                <FluentTextField Class="client__name" Required Autofocus="true" Immediate="true" ImmediateDelay="200"></FluentTextField>
+            </div>
+            <div class="field__container" required>
+                <div class="label__container">
+                    <span>Last Name</span>
+                    <span class="field__validation_message"></span>
+                </div>
+                <FluentTextField Class="client__name" Required Autofocus="true" Immediate="true" ImmediateDelay="200"></FluentTextField>
+            </div>
+        </div>
+        <div class="field__container" required>
+            <div class="label__container">
+                <span>Email</span>
+                <span class="field__validation_message"></span>
+            </div>
+            <FluentTextField Class="client__name" Required Autofocus="true" Immediate="true" ImmediateDelay="200"></FluentTextField>
+        </div>
+        <div class="field__container" required>
+            <div class="label__container">
+                <span>Role</span>
+                <span class="field__validation_message"></span>
+            </div>
+            <FluentTextField Class="client__name" Required Autofocus="true" Immediate="true" ImmediateDelay="200"></FluentTextField>
+        </div>
+    </div>
+    <div class="persona__buttons">
+        <FluentButton Color="var(--error)">
+            <div style="display: grid; grid-template-columns: min-content min-content; column-gap: .4rem">
+                <FluentIcon Value="@(new Icons.Regular.Size20.Delete())" Color="@Color.Error" />
+                Delete
+            </div>
+        </FluentButton>
+        <FluentButton IconStart="@(new Icons.Regular.Size16.Save())" Appearance="Appearance.Accent">Save</FluentButton>
+    </div>
+</div>
+
+@code {
+
+}
