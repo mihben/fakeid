@@ -1,35 +1,47 @@
-﻿@using FakeID.Client.Blazor.Models
+﻿@using FakeID.Client.Blazor.Extensions
+@using FakeID.Client.Blazor.Models
 
-<BxPanel Collapsable="true" Title="@GetTitle()">
-    <div class="persona__data">
-        <div class="persona__name">
-            <BxField Label="First Name" Required="true">
-                <BxInputText @bind-Value="Persona.FirstName"></BxInputText>
+<EditForm EditContext="_context">
+    <DataAnnotationsValidator/>
+
+    <BxPanel Collapsable="true" Title="@GetTitle()">
+        <div class="persona__data">
+            <div class="persona__name">
+                <BxField Label="First Name" Required="true">
+                    <BxInputText @bind-Value="Persona.FirstName"></BxInputText>
+                </BxField>
+
+                <BxField Label="Last Name" Required="true">
+                    <BxInputText @bind-Value="Persona.LastName"></BxInputText>
+                </BxField>
+            </div>
+
+            <BxField Label="Email" Required="true">
+                <BxInputText @bind-Value="Persona.Email"></BxInputText>
             </BxField>
 
-            <BxField Label="Last Name" Required="true">
-                <BxInputText @bind-Value="Persona.LastName"></BxInputText>
+            <BxField Label="Role" Required="true">
+                <BxInputText @bind-Value="Persona.Role"></BxInputText>
             </BxField>
         </div>
 
-        <BxField Label="Email" Required="true">
-            <BxInputText @bind-Value="Persona.Email"></BxInputText>
-        </BxField>
-
-        <BxField Label="Role" Required="true">
-            <BxInputText @bind-Value="Persona.Role"></BxInputText>
-        </BxField>
-    </div>
-
-    <div class="persona__buttons">
-        <BxButton Class="bxbutton--danger" Label="Delete"></BxButton>
-        <BxButton Class="bxbutton--primary" Label="Save"></BxButton>
-    </div>
-</BxPanel>
+        <div class="persona__buttons">
+            <BxButton Class="bxbutton--danger" Label="Delete"></BxButton>
+            <BxButton Disabled="@(!_context.IsModified() || _context.IsValid())" Class="bxbutton--primary" Label="Save"></BxButton>
+        </div>
+    </BxPanel>
+</EditForm>
 
 @code {
+    private EditContext _context = default!;
+
     [Parameter]
     public required Persona Persona { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _context = new EditContext(Persona);
+    }
 
     private string GetTitle()
     {

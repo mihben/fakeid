@@ -189,3 +189,7 @@ span.field__validation_message {
     .icon_button--danger::part(control):hover {
         background-color: rgba(255, 0, 0, .05);
     }
+
+form {
+    width: 100%;
+}
