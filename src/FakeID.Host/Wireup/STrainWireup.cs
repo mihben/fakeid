@@ -1,5 +1,6 @@
 ﻿using FakeID.Api;
 using FakeID.Application.Handlers;
+using FakeID.Application.Performers;
 using STrain;
 using STrain.CQS.NetCore.Builders;
 
@@ -19,6 +20,9 @@ namespace FakeID.Host.Wireup
             builder.AddPerformer<ICommandPerformer<CreateClientCommand>, ClientPerformers>();
             builder.AddPerformer<ICommandPerformer<UpdateClientCommand>, ClientPerformers>();
             builder.AddPerformer<ICommandPerformer<DeleteClientCommand>, ClientPerformers>();
+
+            builder.AddPerformer<IQueryPerformer<GetPersonasQuery, IEnumerable<GetPersonasQuery.Result>>, PersonaPerformers>();
+            builder.AddPerformer<ICommandPerformer<CreatePersonaCommand>, PersonaPerformers>();
         }
     }
 }

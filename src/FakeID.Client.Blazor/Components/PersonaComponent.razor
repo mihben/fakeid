@@ -1,52 +1,38 @@
-﻿@using Microsoft.FluentUI.AspNetCore.Components
-@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
+﻿@using FakeID.Client.Blazor.Models
 
-<div class="persona__container">  
-    <span class="persona__title">Persona Detail</span>
-
+<BxPanel Collapsable="true" Title="@GetTitle()">
     <div class="persona__data">
         <div class="persona__name">
-            <div class="field__container" required>
-                <div class="label__container">
-                    <span>First Name</span>
-                    <span class="field__validation_message"></span>
-                </div>
-                <FluentTextField Class="client__name" Required Autofocus="true" Immediate="true" ImmediateDelay="200"></FluentTextField>
-            </div>
-            <div class="field__container" required>
-                <div class="label__container">
-                    <span>Last Name</span>
-                    <span class="field__validation_message"></span>
-                </div>
-                <FluentTextField Class="client__name" Required Autofocus="true" Immediate="true" ImmediateDelay="200"></FluentTextField>
-            </div>
+            <BxField Label="First Name" Required="true">
+                <BxInputText @bind-Value="Persona.FirstName"></BxInputText>
+            </BxField>
+
+            <BxField Label="Last Name" Required="true">
+                <BxInputText @bind-Value="Persona.LastName"></BxInputText>
+            </BxField>
         </div>
-        <div class="field__container" required>
-            <div class="label__container">
-                <span>Email</span>
-                <span class="field__validation_message"></span>
-            </div>
-            <FluentTextField Class="client__name" Required Autofocus="true" Immediate="true" ImmediateDelay="200"></FluentTextField>
-        </div>
-        <div class="field__container" required>
-            <div class="label__container">
-                <span>Role</span>
-                <span class="field__validation_message"></span>
-            </div>
-            <FluentTextField Class="client__name" Required Autofocus="true" Immediate="true" ImmediateDelay="200"></FluentTextField>
-        </div>
+
+        <BxField Label="Email" Required="true">
+            <BxInputText @bind-Value="Persona.Email"></BxInputText>
+        </BxField>
+
+        <BxField Label="Role" Required="true">
+            <BxInputText @bind-Value="Persona.Role"></BxInputText>
+        </BxField>
     </div>
+
     <div class="persona__buttons">
-        <FluentButton Color="var(--error)">
-            <div style="display: grid; grid-template-columns: min-content min-content; column-gap: .4rem">
-                <FluentIcon Value="@(new Icons.Regular.Size20.Delete())" Color="@Color.Error" />
-                Delete
-            </div>
-        </FluentButton>
-        <FluentButton IconStart="@(new Icons.Regular.Size16.Save())" Appearance="Appearance.Accent">Save</FluentButton>
+        <BxButton Class="bxbutton--danger" Label="Delete"></BxButton>
+        <BxButton Class="bxbutton--primary" Label="Save"></BxButton>
     </div>
-</div>
+</BxPanel>
 
 @code {
+    [Parameter]
+    public required Persona Persona { get; set; }
 
+    private string GetTitle()
+    {
+        return $"Persona Detail: {Persona.FirstName}, {Persona.LastName}";
+    }
 }

@@ -45,6 +45,8 @@ namespace FakeID.Application.Test.Unit.Fixtures
 
         public async Task InsertAsync(ClientEntity client)
         {
+            OpenConnection();
+
             var context = CreateContext();
 
             await using var transation = await context.Database.BeginTransactionAsync();

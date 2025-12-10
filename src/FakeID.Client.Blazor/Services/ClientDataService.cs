@@ -1,5 +1,6 @@
 ﻿
 using FakeID.Api;
+using Microsoft.AspNetCore.Components;
 using STrain;
 
 namespace FakeID.Client.Blazor.Services
@@ -8,6 +9,8 @@ namespace FakeID.Client.Blazor.Services
     {
         IEnumerable<Models.Client> Clients { get; }
         Models.Client? Selected { get; set; }
+
+        event Func<object?, Models.Client, Task> SelectionChanged;
 
         Task LoadAsync(CancellationToken cancellationToken);
         Task SaveAsync(Models.Client client, CancellationToken cancellationToken);
@@ -19,7 +22,23 @@ namespace FakeID.Client.Blazor.Services
         private readonly IRequestSender _sender;
 
         public IEnumerable<Models.Client> Clients { get; private set; } = [];
-        public Models.Client? Selected { get; set; }
+
+        private Models.Client? _selected;
+        public Models.Client? Selected
+        {
+            get
+            {
+                return _selected;
+            }
+
+            set
+            {
+                _selected = value;
+                NotifySelectionChanged(_selected);
+            }
+        }
+
+        public event Func<object?, Models.Client, Task> SelectionChanged;
 
         public ClientDataService(IRequestSender sender)
         {
@@ -57,6 +76,11 @@ namespace FakeID.Client.Blazor.Services
             await LoadAsync(cancellationToken);
 
             Selected = null;
+        }
+
+        private void NotifySelectionChanged(Models.Client? client)
+        {
+            SelectionChanged?.Invoke(this, client);
         }
     }
 }

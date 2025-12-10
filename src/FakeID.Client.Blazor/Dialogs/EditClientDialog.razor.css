@@ -1,3 +1,20 @@
 ﻿.client__name {
     width: 100%;
 }
+
+div.editclient__container {
+    width: 100%;
+    height: auto;
+
+    display: grid;
+    grid-template-rows: 1fr min-content;
+    row-gap: .8rem;
+}
+
+div.editclient__buttons {
+    display: grid;
+    grid-template-columns: min-content min-content;
+    justify-content: end;
+
+    column-gap: .4rem;
+}

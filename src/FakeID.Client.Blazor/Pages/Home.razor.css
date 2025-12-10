@@ -65,7 +65,7 @@ div.personas--not-selected {
 
 div.personas__container {
     display: grid;
-    grid-template-rows: min-content 1fr;
+    grid-template-rows: min-content 1fr min-content;
     row-gap: 1.2rem;
 
     justify-items: center;
@@ -89,4 +89,12 @@ div.personas {
     overflow: auto;
 
     row-gap: .4rem;
+}
+
+fluent-button {
+    width: 100%;
+}
+
+.personas__add {
+    width: 100%;
 }

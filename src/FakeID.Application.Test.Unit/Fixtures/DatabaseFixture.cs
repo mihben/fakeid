@@ -11,6 +11,8 @@ namespace FakeID.Application.Test.Unit.Fixtures
 
         public void OpenConnection()
         {
+            if (_connection is not null) return;
+
             _connection = new SqliteConnection(connectionString);
             _connection.Open();
         }

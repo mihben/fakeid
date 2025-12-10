@@ -2,9 +2,9 @@
 using Bogus.Extensions;
 using FakeID.Api;
 using FakeID.Client.Blazor.Services;
+using FakeID.Client.Blazor.Test.Unit.Helpers;
 using Moq;
 using STrain;
-using STrain.CQS.Api;
 
 namespace FakeID.Client.Blazor.Test.Unit.Services
 {
@@ -88,18 +88,6 @@ namespace FakeID.Client.Blazor.Test.Unit.Services
 
     file static class ClientDataServiceTestExtensions
     {
-        public static Moq.Language.Flow.ISetup<IRequestSender, Task<T?>> SetupQuery<TQuery, T>(this Mock<IRequestSender> mock)
-            where TQuery : IQuery
-        {
-            return mock.Setup(m => m.SendAsync<TQuery, T>(It.IsAny<TQuery>(), It.IsAny<CancellationToken>()));
-        }
-
-        public static void VerifyCommand<TCommand>(this Mock<IRequestSender> mock, Func<TCommand, bool> verify)
-            where TCommand : ICommand
-        {
-            mock.Verify(m => m.SendAsync<TCommand, object?>(It.Is<TCommand>(c => verify(c)), It.IsAny<CancellationToken>()), Times.Once());
-        }
-
         public static IEnumerable<Action<Models.Client>> AsInspectors(this IEnumerable<GetClientsQuery.Result> results)
         {
             foreach (var result in results)

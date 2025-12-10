@@ -2,14 +2,12 @@
 @using FakeID.Client.Blazor.Components
 @using FakeID.Client.Blazor.Dialogs
 @using FakeID.Client.Blazor.Services
-@using Microsoft.FluentUI.AspNetCore.Components
 @using STrain
 @using System.Threading.Tasks
-@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
-@using Emojis = Microsoft.FluentUI.AspNetCore.Components.Emojis
 
-@inject IDialogService DialogService;
 @inject IClientDataService dataService;
+@inject IPersonaDataService personaDataService;
+@inject IBxDialogService dialogService;
 
 @page "/"
 
@@ -21,41 +19,35 @@
 
         <div class="clients__data">
             <div class="clients__header">
-                <FluentSearch Placeholder="Search for client" AutoComplete="off"
-                              @bind-Value="@_criteria" @bind-Value:after="Search"
-                              Immediate="true" ImmediateDelay="100"></FluentSearch>
+                <BxInputText Placeholder="Search for client"
+                                  @bind-Value="@_criteria" @bind-Value:after="Search"></BxInputText>
                 @if (_ascending) {
-                    <FluentButton IconEnd="new Icons.Regular.Size20.TextSortAscending()" OnClick="@ChangeOrder"></FluentButton>
+                    <BxButton @onclick="ChangeOrder">
+                        <Icon>
+                            <i class="ri-sort-alphabet-asc"></i>
+                        </Icon>
+                    </BxButton>
                 }
                 else {
-                    <FluentButton IconEnd="new Icons.Regular.Size20.TextSortDescending()" OnClick="@ChangeOrder"></FluentButton>
+                    <BxButton @onclick="ChangeOrder">
+                        <Icon>
+                            <i class="ri-sort-alphabet-desc"></i>
+                        </Icon>
+                    </BxButton>
                 }
             </div>
 
-            <FluentDataGrid Items="@GetClients()" ShowHover="true" GenerateHeader="GenerateHeaderOption.None">
-                <SelectColumn TGridItem="Models.Client" SelectMode="DataGridSelectMode.SingleSticky" Property="c => dataService.Selected?.Id == c.Id"
-                              SelectFromEntireRow="true" OnSelect="@(c => dataService.Selected = c.Item)" Width="0px" Style="display: none"></SelectColumn>
-                <TemplateColumn>
-                    <div class="client__content">
-                        <span>@context.Name</span>
-                        <FluentButton Class="icon_button" OnClick="@EditClientAsync">
-                            <FluentIcon Value="@(new Icons.Regular.Size12.Edit())" />
-                        </FluentButton>
-                        <FluentButton Class="icon_button icon_button--danger" OnClick="@DeleteAsync">
-                            <FluentIcon Value="@(new Icons.Regular.Size12.Delete())"/>
-                        </FluentButton>
-                    </div>
-                </TemplateColumn>
-            </FluentDataGrid>
+            <BxTable Items="@GetClients()" ShowHeader="false" @bind-Selected="@dataService.Selected">
+                <BxTableColumn T="Models.Client" Title="Name" Value="c => c.Name"/>
+            </BxTable>
 
-            <FluentButton Appearance="Appearance.Accent" OnClick="@AddNewClientAsync">Add New Client</FluentButton>
+            <BxButton Label="Add New Client" @onclick="AddNewClientAsync"></BxButton>
         </div>
     </div>
     <div class="container">
         @if (dataService.Selected is null)
         {
             <div class="personas--not-selected">
-                <FluentEmoji Value="@(new Emojis.PeopleBody.Color.Light.ManShrugging())" Width="96px"/>
                 <span class="personas__message">Select a client to display personas</span>             
             </div>
         }
@@ -65,17 +57,13 @@
                 <span class="personas__title">@dataService.Selected.Name</span>
 
                 <div class="personas">
-                    <PersonaComponent></PersonaComponent>
-                    <PersonaComponent></PersonaComponent>
-                    <PersonaComponent></PersonaComponent>
-                    <PersonaComponent></PersonaComponent>
-                    <PersonaComponent></PersonaComponent>
-                    <PersonaComponent></PersonaComponent>
-                    <PersonaComponent></PersonaComponent>
-                    <PersonaComponent></PersonaComponent>
-                    <PersonaComponent></PersonaComponent>
-                    <PersonaComponent></PersonaComponent>
+                    @foreach (var persona in personaDataService.Personas)
+                    {
+                        <PersonaComponent Persona="@persona"></PersonaComponent>
+                    }
                 </div>
+
+                <BxButton Label="Add Persona"/>
             </div>
         }
     </div>
@@ -98,6 +86,8 @@
             await dataService.LoadAsync(CancellationToken.None);
             _filteredClients = dataService.Clients;
             StateHasChanged();
+
+            dataService.SelectionChanged += HandleSelectionChanged;
         }
         base.OnAfterRender(firstRender);
 
@@ -113,35 +103,25 @@
 
     private async Task AddNewClientAsync()
     {
-        var dialog = await DialogService.ShowDialogAsync<EditClientDialog>(new Models.Client() { Id = Guid.NewGuid() }, new DialogParameters
-        {
-            PreventDismissOnOverlayClick = true
-        });
-
-        var result = await dialog.Result;
-        if (result.Cancelled) return;
-
-        var data = (Models.Client)result.Data!;
-
-        await dataService.SaveAsync(data, CancellationToken.None);
-        Search();
+        dialogService.Create<EditClientDialog>()
+                .WithTitle("Edit Client")
+                .WithData(new Models.Client() { Id = Guid.NewGuid() })
+                .OnOk(async (result) => await SaveAsync(result.Get<Models.Client>()!))
+            .Show();
     }
 
     private async Task EditClientAsync()
     {
-        if (dataService.Selected is null) return;
+        dialogService.Create<EditClientDialog>()
+                .WithTitle("Edit Client")
+                .WithData(dataService.Selected)
+                .OnOk(async (result) => await SaveAsync(result.Get<Models.Client>()!))
+            .Show();
+    }
 
-        var dialog = await DialogService.ShowDialogAsync<EditClientDialog>(dataService.Selected, new DialogParameters
-        {
-            PreventDismissOnOverlayClick = true
-        });
-
-        var result = await dialog.Result;
-        if (result.Cancelled) return;
-
-        var data = (Models.Client)result.Data!;
-
-        await dataService.SaveAsync(data, CancellationToken.None);
+    private async Task SaveAsync(Models.Client client)
+    {
+        await dataService.SaveAsync(client, CancellationToken.None);
         Search();
     }
 
@@ -156,9 +136,17 @@
         _ascending = !_ascending;
     }
 
-    private IQueryable<Models.Client> GetClients()
+    private IEnumerable<Models.Client> GetClients()
     {
-        if (_ascending) return _filteredClients.OrderBy(c => c.Name).AsQueryable();
-        else return _filteredClients.OrderByDescending(c => c.Name).AsQueryable();
+        if (_ascending) return _filteredClients.OrderBy(c => c.Name);
+        else return _filteredClients.OrderByDescending(c => c.Name);
+    }
+
+    private async Task HandleSelectionChanged(object? sender, Models.Client? client)
+    {
+        if (client is null) return;
+
+        await personaDataService.LoadAsync(client.Id, CancellationToken.None);
+        StateHasChanged();
     }
 }
