@@ -1,5 +1,9 @@
-﻿@using FakeID.Client.Blazor.Extensions
+﻿
+@using FakeID.Client.Blazor.Extensions
 @using FakeID.Client.Blazor.Models
+@using FakeID.Client.Blazor.Services
+
+@inject IPersonaDataService PersonaDataService
 
 <EditForm EditContext="_context">
     <DataAnnotationsValidator/>
@@ -26,8 +30,8 @@
         </div>
 
         <div class="persona__buttons">
-            <BxButton Class="bxbutton--danger" Label="Delete"></BxButton>
-            <BxButton Disabled="@(!_context.IsModified() || _context.IsValid())" Class="bxbutton--primary" Label="Save"></BxButton>
+            <BxButton @onclick="DeleteAsync" Class="bxbutton--danger" Label="Delete"></BxButton>
+            <BxButton @onclick="SaveAsync" Disabled="@(!_context.IsModified() || _context.IsValid())" Class="bxbutton--primary" Label="Save"></BxButton>
         </div>
     </BxPanel>
 </EditForm>
@@ -38,6 +42,11 @@
     [Parameter]
     public required Persona Persona { get; set; }
 
+    [Parameter]
+    public EventCallback<Persona> OnSave { get; set; }
+    [Parameter]
+    public EventCallback<Persona> OnDelete { get; set; }
+
     protected override void OnInitialized()
     {
         _context = new EditContext(Persona);
@@ -46,5 +55,16 @@
     private string GetTitle()
     {
         return $"Persona Detail: {Persona.FirstName}, {Persona.LastName}";
+    }
+
+    private async Task SaveAsync()
+    {
+        await OnSave.InvokeAsync(Persona);
+        _context.MarkAsUnmodified();
+    }
+
+    private async Task DeleteAsync()
+    {
+        await OnDelete.InvokeAsync(Persona);
     }
 }

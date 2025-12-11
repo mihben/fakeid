@@ -13,5 +13,7 @@ namespace FakeID.Client.Blazor.Models
         public string? Email { get; set; }
         [Required]
         public string? Role { get; set; }
+
+        public bool IsNew { get; init; } = false;
     }
 }

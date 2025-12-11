@@ -23,6 +23,8 @@ namespace FakeID.Host.Wireup
 
             builder.AddPerformer<IQueryPerformer<GetPersonasQuery, IEnumerable<GetPersonasQuery.Result>>, PersonaPerformers>();
             builder.AddPerformer<ICommandPerformer<CreatePersonaCommand>, PersonaPerformers>();
+            builder.AddPerformer<ICommandPerformer<UpdatePersonaCommand>, PersonaPerformers>();
+            builder.AddPerformer<ICommandPerformer<DeletePersonaCommand>, PersonaPerformers>();
         }
     }
 }

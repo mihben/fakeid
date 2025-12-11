@@ -9,6 +9,9 @@ namespace FakeID.Client.Blazor.Services
         IEnumerable<Models.Persona> Personas { get; }
 
         Task LoadAsync(Guid client, CancellationToken cancellationToken);
+        void AddPersona();
+        Task SaveAsync(Guid client, Persona persona, CancellationToken cancellationToken);
+        Task DeleteAsync(Guid client, Persona persona, CancellationToken cancellationToken);
     }
 
     public class PersonaDataService : IPersonaDataService
@@ -31,8 +34,54 @@ namespace FakeID.Client.Blazor.Services
                 FirstName = r.FirstName,
                 LastName = r.LastName,
                 Role = r.Role,
-                Email = r.Email
+                Email = r.Email,
+                IsNew = false
             })];
+        }
+
+        public void AddPersona()
+        {
+            Personas = [.. Personas, new Persona { Id = Guid.NewGuid(), IsNew = true }];
+        }
+
+        public async Task SaveAsync(Guid client, Persona persona, CancellationToken cancellationToken)
+        {
+            if (persona.IsNew)
+            {
+                await _sender.SendAsync(new CreatePersonaCommand
+                {
+                    Client = client,
+                    Id = persona.Id,
+                    FirstName = persona.FirstName!,
+                    LastName = persona.LastName!,
+                    Email = persona.Email!,
+                    Role = persona.Role!
+                }, cancellationToken);
+            }
+            else
+            {
+                await _sender.SendAsync(new UpdatePersonaCommand
+                {
+                    Client = client,
+                    Persona = persona.Id,
+                    FirstName = persona.FirstName!,
+                    LastName = persona.LastName!,
+                    Email = persona.Email!,
+                    Role = persona.Role!
+                }, cancellationToken);
+            }
+
+            await LoadAsync(client, cancellationToken);
+        }
+
+        public async Task DeleteAsync(Guid client, Persona persona, CancellationToken cancellationToken)
+        {
+            await _sender.SendAsync(new DeletePersonaCommand
+            {
+                Client = client,
+                Persona = persona.Id
+            }, cancellationToken);
+            await LoadAsync(client, cancellationToken);
         }
     }
 }

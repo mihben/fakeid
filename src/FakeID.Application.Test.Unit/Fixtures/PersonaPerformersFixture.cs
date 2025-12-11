@@ -36,6 +36,13 @@ namespace FakeID.Application.Test.Unit.Fixtures
             return await context.Personas.Where(p => p.Client.Id == client).ToListAsync();
         }
 
+        public async Task<PersonaEntity?> GetPersonaAsync(Guid persona)
+        {
+            await using var context = CreateContext();
+
+            return await context.Personas.FindAsync(persona);
+        }
+
         public async Task InsertAsync(PersonaEntity persona)
         {
             await using var context = CreateContext();

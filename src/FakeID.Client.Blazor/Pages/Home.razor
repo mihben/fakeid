@@ -59,11 +59,11 @@
                 <div class="personas">
                     @foreach (var persona in personaDataService.Personas)
                     {
-                        <PersonaComponent Persona="@persona"></PersonaComponent>
+                        <PersonaComponent Persona="@persona" OnSave="SavePersonaAsync" OnDelete="DeletePersonaAsync"></PersonaComponent>
                     }
                 </div>
 
-                <BxButton Label="Add Persona"/>
+                <BxButton Label="Add Persona" @onclick="AddNewPersonaAsync"/>
             </div>
         }
     </div>
@@ -148,5 +148,24 @@
 
         await personaDataService.LoadAsync(client.Id, CancellationToken.None);
         StateHasChanged();
+    }
+
+    private void AddNewPersonaAsync()
+    {
+        personaDataService.AddPersona();
+    }
+
+    private async Task SavePersonaAsync(Models.Persona persona)
+    {
+        if (dataService.Selected is null) return;
+
+        await personaDataService.SaveAsync(dataService.Selected.Id, persona, CancellationToken.None);
+    }
+
+    private async Task DeletePersonaAsync(Models.Persona persona)
+    {
+        if (dataService.Selected is null) return;
+
+        await personaDataService.DeleteAsync(dataService.Selected.Id, persona, CancellationToken.None);
     }
 }

@@ -8,7 +8,9 @@ using STrain;
 namespace FakeID.Application.Performers
 {
     public class PersonaPerformers : IQueryPerformer<GetPersonasQuery, IEnumerable<GetPersonasQuery.Result>>,
-        ICommandPerformer<CreatePersonaCommand>
+        ICommandPerformer<CreatePersonaCommand>,
+        ICommandPerformer<UpdatePersonaCommand>,
+        ICommandPerformer<DeletePersonaCommand>
     {
         private readonly ApplicationContext _context;
         private readonly ILogger<PersonaPerformers> _logger;
@@ -55,6 +57,59 @@ namespace FakeID.Application.Performers
                     Email = command.Email,
                     Role = command.Role
                 }, cancellationToken);
+
+                await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+                throw;
+            }
+        }
+
+        public async Task PerformAsync(UpdatePersonaCommand command, CancellationToken cancellationToken)
+        {
+            _logger.LogDebug("Updating {Persona} persona", command.Persona, cancellationToken);
+
+            await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                var persona = await _context.Personas.FindAsync([command.Persona], cancellationToken).ConfigureAwait(false);
+                if (persona is null) throw Exceptions.Personas.NotFound;
+
+                persona.FirstName = command.FirstName;
+                persona.LastName = command.LastName;
+                persona.Email = command.Email;
+                persona.Role = command.Role;
+
+                await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+                throw;
+            }
+        }
+
+        public async Task PerformAsync(DeletePersonaCommand command, CancellationToken cancellationToken)
+        {
+            _logger.LogDebug("Deleting {Persona} persona", command.Persona, cancellationToken);
+
+            await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                var persona = await _context.Personas.FindAsync([command.Persona], cancellationToken).ConfigureAwait(false);
+                if (persona is null)
+                {
+                    _logger.LogDebug("{Persona} persona was not found", command.Persona, cancellationToken);
+                    return;
+                }
+
+                _context.Personas.Remove(persona);
 
                 await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
