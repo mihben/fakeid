@@ -26,6 +26,8 @@ namespace FakeID.Client.Blazor.Services
 
         public async Task LoadAsync(Guid client, CancellationToken cancellationToken)
         {
+            Personas = [];
+
             var result = await _sender.GetAsync<GetPersonasQuery, IEnumerable<GetPersonasQuery.Result>>(new GetPersonasQuery(client), cancellationToken).ConfigureAwait(false);
 
             Personas = [.. result!.Select(r => new Models.Persona
@@ -76,6 +78,8 @@ namespace FakeID.Client.Blazor.Services
 
         public async Task DeleteAsync(Guid client, Persona persona, CancellationToken cancellationToken)
         {
+            Personas = [];
+
             await _sender.SendAsync(new DeletePersonaCommand
             {
                 Client = client,

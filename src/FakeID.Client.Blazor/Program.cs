@@ -1,5 +1,4 @@
 using BlazX;
-using BlazX.Utilities.Dialog;
 using FakeID.Client.Blazor;
 using FakeID.Client.Blazor.Services;
 using Microsoft.AspNetCore.Components.Web;
@@ -13,9 +12,9 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddHttpClient();
 builder.UseLightinject();
 
-builder.Services.AddSingleton<BxDialogService>();
-builder.Services.AddTransient<IBxDialogService>(provider => provider.GetRequiredService<BxDialogService>());
-builder.Services.AddSingleton<IBxDialog>(provider => provider.GetRequiredService<BxDialogService>());
+builder.Services
+    .AddBxDialog()
+    .AddBxLoader();
 
 builder.Services.AddSingleton<IClientDataService, ClientDataService>();
 builder.Services.AddSingleton<IPersonaDataService, PersonaDataService>();

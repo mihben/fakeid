@@ -8,6 +8,7 @@
 @inject IClientDataService dataService;
 @inject IPersonaDataService personaDataService;
 @inject IBxDialogService dialogService;
+@inject IBxLoadingService loadingService;
 
 @page "/"
 
@@ -37,11 +38,27 @@
                 }
             </div>
 
-            <BxTable Items="@GetClients()" ShowHeader="false" @bind-Selected="@dataService.Selected">
-                <BxTableColumn T="Models.Client" Title="Name" Value="c => c.Name"/>
-            </BxTable>
+            <BxLoaderContext Key="Clients">
+                <BxTable Items="@GetClients()" ShowHeader="false" @bind-Selected="@dataService.Selected">
+                    <BxTemplateColumn TItem="Models.Client" Title="Name">
+                        <div class="client__row">
+                            <span>@context.Name</span>
+                            <BxButton Style="BlazX.Form.Button.BxButtonStyle.Rounded" @onclick="EditClientAsync"> 
+                                <Icon>
+                                    <i class="ri-pencil-line"></i>
+                                </Icon>
+                            </BxButton>
+                            <BxButton Style="BlazX.Form.Button.BxButtonStyle.Rounded" @onclick="DeleteAsync">
+                                <Icon>        
+                                    <i class="ri-delete-bin-line"></i>
+                                </Icon>
+                            </BxButton>
+                        </div>
+                    </BxTemplateColumn>
+                </BxTable>
 
-            <BxButton Label="Add New Client" @onclick="AddNewClientAsync"></BxButton>
+                <BxButton Label="Add New Client" @onclick="AddNewClientAsync"></BxButton>
+            </BxLoaderContext>
         </div>
     </div>
     <div class="container">
@@ -56,14 +73,17 @@
             <div class="personas__container">
                 <span class="personas__title">@dataService.Selected.Name</span>
 
-                <div class="personas">
-                    @foreach (var persona in personaDataService.Personas)
-                    {
-                        <PersonaComponent Persona="@persona" OnSave="SavePersonaAsync" OnDelete="DeletePersonaAsync"></PersonaComponent>
-                    }
-                </div>
+                <BxLoaderContext Key="Personas">
+                    <BxLoadingScreen TLoader="BxLoadingSpinner"></BxLoadingScreen>
+                    <div class="personas">
+                        @foreach (var persona in personaDataService.Personas)
+                        {
+                            <PersonaComponent Persona="@persona" OnSave="SavePersonaAsync" OnDelete="DeletePersonaAsync"></PersonaComponent>
+                        }
+                    </div>
 
-                <BxButton Label="Add Persona" @onclick="AddNewPersonaAsync"/>
+                    <BxButton Label="Add Persona" @onclick="AddNewPersonaAsync"/>
+                </BxLoaderContext>
             </div>
         }
     </div>
@@ -79,18 +99,19 @@
 
     private Models.Client? _client = null;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
+        await base.OnInitializedAsync();
+
+        loadingService.Register("Clients");
+        loadingService.Register("Personas");
+
+        using (loadingService.Show("Clients"))
         {
+            dataService.SelectionChanged += HandleSelectionChanged;
             await dataService.LoadAsync(CancellationToken.None);
             _filteredClients = dataService.Clients;
-            StateHasChanged();
-
-            dataService.SelectionChanged += HandleSelectionChanged;
         }
-        base.OnAfterRender(firstRender);
-
     }
 
     private void Search()
@@ -121,12 +142,16 @@
 
     private async Task SaveAsync(Models.Client client)
     {
-        await dataService.SaveAsync(client, CancellationToken.None);
-        Search();
+        using (loadingService.Show("Clients"))
+        {
+            await dataService.SaveAsync(client, CancellationToken.None);
+            Search();            
+        }
     }
 
     private async Task DeleteAsync()
     {
+        using var loader = loadingService.Show("Clients");
         await dataService.DeleteAsync(CancellationToken.None);
         Search();
     }
@@ -145,8 +170,13 @@
     private async Task HandleSelectionChanged(object? sender, Models.Client? client)
     {
         if (client is null) return;
+        
+        using (loadingService.Show("Personas"))
+        {
+            StateHasChanged();
+            await personaDataService.LoadAsync(client.Id, CancellationToken.None);
+        }
 
-        await personaDataService.LoadAsync(client.Id, CancellationToken.None);
         StateHasChanged();
     }
 
@@ -159,13 +189,19 @@
     {
         if (dataService.Selected is null) return;
 
-        await personaDataService.SaveAsync(dataService.Selected.Id, persona, CancellationToken.None);
+        using (loadingService.Show(persona.Id.ToString()))
+        {
+            await personaDataService.SaveAsync(dataService.Selected.Id, persona, CancellationToken.None);            
+        }
     }
 
     private async Task DeletePersonaAsync(Models.Persona persona)
     {
         if (dataService.Selected is null) return;
 
-        await personaDataService.DeleteAsync(dataService.Selected.Id, persona, CancellationToken.None);
+        using (loadingService.Show("Personas"))
+        {
+            await personaDataService.DeleteAsync(dataService.Selected.Id, persona, CancellationToken.None);
+        }
     }
 }
