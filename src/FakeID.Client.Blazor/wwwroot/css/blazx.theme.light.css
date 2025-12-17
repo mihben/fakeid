@@ -1,0 +1,15 @@
+﻿:root {
+    --panels__background: 250, 245, 245;
+    --panels__border: 9, 30, 66;
+    --panels__border--active: 50, 75, 250;
+    --text: 0, 3, 32;
+    --text--active: 50, 75, 250;
+    --text--error: 192, 0, 0;
+    --control__background: 250, 250, 250;
+    --control__background--highlight: 230, 242, 255;
+    --control__background--required: 254, 252, 232;
+    --control__border: 128, 128, 128;
+    --control__border--active: 50, 75, 250;
+    --control__border--invalid: 192, 0, 0;
+    --overlay__background: 0, 0, 0;
+}

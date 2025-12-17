@@ -1,0 +1,72 @@
+﻿
+@using FakeID.Client.Blazor.Extensions
+@using FakeID.Client.Blazor.Models
+@using FakeID.Client.Blazor.Services
+
+@inject IPersonaDataService PersonaDataService
+
+<BxLoaderContext Key=@Persona.Id.ToString()>
+    <EditForm EditContext="_context">
+        <DataAnnotationsValidator/>
+
+        <BxPanel Collapsable="true" Title="@GetTitle()">
+            <div class="persona__data">
+                <div class="persona__name">
+                    <BxField Label="First Name" Required="true">
+                        <BxInputText @bind-Value="Persona.FirstName"></BxInputText>
+                    </BxField>
+
+                    <BxField Label="Last Name" Required="true">
+                        <BxInputText @bind-Value="Persona.LastName"></BxInputText>
+                    </BxField>
+                </div>
+
+                <BxField Label="Email" Required="true">
+                    <BxInputText @bind-Value="Persona.Email"></BxInputText>
+                </BxField>
+
+                <BxField Label="Role" Required="true">
+                    <BxInputText @bind-Value="Persona.Role"></BxInputText>
+                </BxField>
+            </div>
+
+            <div class="persona__buttons">
+                <BxButton @onclick="DeleteAsync" Class="bxbutton--danger" Label="Delete"></BxButton>
+                <BxButton @onclick="SaveAsync" Disabled="@(!_context.IsModified() || _context.IsValid())" Class="bxbutton--primary" Label="Save"></BxButton>
+            </div>
+        </BxPanel>
+    </EditForm>
+</BxLoaderContext>
+
+@code {
+    private EditContext _context = default!;
+
+    [Parameter]
+    public required Persona Persona { get; set; }
+
+    [Parameter]
+    public EventCallback<Persona> OnSave { get; set; }
+    [Parameter]
+    public EventCallback<Persona> OnDelete { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _context = new EditContext(Persona);
+    }
+
+    private string GetTitle()
+    {
+        return $"Persona Detail: {Persona.FirstName}, {Persona.LastName}";
+    }
+
+    private async Task SaveAsync()
+    {
+        await OnSave.InvokeAsync(Persona);
+        _context.MarkAsUnmodified();
+    }
+
+    private async Task DeleteAsync()
+    {
+        await OnDelete.InvokeAsync(Persona);
+    }
+}

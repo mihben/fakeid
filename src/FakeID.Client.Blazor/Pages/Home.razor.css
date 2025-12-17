@@ -1,0 +1,110 @@
+﻿div.content {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: .4rem;
+
+    padding: .4rem;
+}
+
+div.clients__container {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-row-gap: 3rem;
+}
+
+div.clients__data{
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-row-gap: .6rem;
+}
+
+div.clients__header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-column-gap: .2rem;
+}
+
+tr.client--selected {
+    background-color: lightblue;
+}
+
+div.client__content {
+    display: grid;
+    grid-template-columns: 1fr max-content max-content;
+    column-gap: .4rem;
+
+    height: max-content;
+
+    align-items: center;
+}
+
+.client__icon:has(:hover) {
+    background-color: red; 
+}
+
+span.personas__message {
+    justify-self: center;
+    align-self: center;
+
+    font-size: 1.6rem;
+    font-weight: bold;
+}
+
+div.container {
+    display: grid;
+}
+
+div.personas--not-selected {
+    display: grid;
+    grid-template-rows: max-content max-content;
+    row-gap: .4rem;
+
+    align-content: center;
+    justify-items: center;
+}
+
+div.personas__container {
+    display: grid;
+    grid-template-rows: min-content 1fr min-content;
+    row-gap: 1.2rem;
+
+    justify-items: center;
+}
+
+span.personas__title {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+div.personas {
+    display: grid;
+    grid-auto-rows: min-content;
+    grid-auto-flow: row;
+    row-gap: .4rem;
+
+    padding: .2rem;
+
+    justify-items: center;
+
+    overflow: auto;
+
+    row-gap: .4rem;
+}
+
+fluent-button {
+    width: 100%;
+}
+
+.personas__add {
+    width: 100%;
+}
+
+div.client__row {
+    display: grid;
+    grid-template-columns: 1fr min-content min-content;
+    column-gap: .2rem;
+
+    align-items: center;
+
+    padding: .2rem;
+}

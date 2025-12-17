@@ -1,7 +1,207 @@
-﻿@page "/"
+﻿@using FakeID.Api
+@using FakeID.Client.Blazor.Components
+@using FakeID.Client.Blazor.Dialogs
+@using FakeID.Client.Blazor.Services
+@using STrain
+@using System.Threading.Tasks
 
-<PageTitle>Home</PageTitle>
+@inject IClientDataService dataService;
+@inject IPersonaDataService personaDataService;
+@inject IBxDialogService dialogService;
+@inject IBxLoadingService loadingService;
 
-<h1>Hello, world!</h1>
+@page "/"
 
-Welcome to your new app.
+<PageTitle>Clients</PageTitle>
+
+<div class="content">
+    <div class="container clients__container">
+        <span class="title">Clients</span>
+
+        <div class="clients__data">
+            <div class="clients__header">
+                <BxInputText Placeholder="Search for client"
+                                  @bind-Value="@_criteria" @bind-Value:after="Search"></BxInputText>
+                @if (_ascending) {
+                    <BxButton @onclick="ChangeOrder">
+                        <Icon>
+                            <i class="ri-sort-alphabet-asc"></i>
+                        </Icon>
+                    </BxButton>
+                }
+                else {
+                    <BxButton @onclick="ChangeOrder">
+                        <Icon>
+                            <i class="ri-sort-alphabet-desc"></i>
+                        </Icon>
+                    </BxButton>
+                }
+            </div>
+
+            <BxLoaderContext Key="Clients">
+                <BxTable Items="@GetClients()" ShowHeader="false" @bind-Selected="@dataService.Selected">
+                    <BxTemplateColumn TItem="Models.Client" Title="Name">
+                        <div class="client__row">
+                            <span>@context.Name</span>
+                            <BxButton Style="BlazX.Form.Button.BxButtonStyle.Rounded" @onclick="EditClientAsync"> 
+                                <Icon>
+                                    <i class="ri-pencil-line"></i>
+                                </Icon>
+                            </BxButton>
+                            <BxButton Style="BlazX.Form.Button.BxButtonStyle.Rounded" @onclick="DeleteAsync">
+                                <Icon>        
+                                    <i class="ri-delete-bin-line"></i>
+                                </Icon>
+                            </BxButton>
+                        </div>
+                    </BxTemplateColumn>
+                </BxTable>
+
+                <BxButton Label="Add New Client" @onclick="AddNewClientAsync"></BxButton>
+            </BxLoaderContext>
+        </div>
+    </div>
+    <div class="container">
+        @if (dataService.Selected is null)
+        {
+            <div class="personas--not-selected">
+                <span class="personas__message">Select a client to display personas</span>             
+            </div>
+        }
+        else
+        {
+            <div class="personas__container">
+                <span class="personas__title">@dataService.Selected.Name</span>
+
+                <BxLoaderContext Key="Personas">
+                    <BxLoadingScreen TLoader="BxLoadingSpinner"></BxLoadingScreen>
+                    <div class="personas">
+                        @foreach (var persona in personaDataService.Personas)
+                        {
+                            <PersonaComponent Persona="@persona" OnSave="SavePersonaAsync" OnDelete="DeletePersonaAsync"></PersonaComponent>
+                        }
+                    </div>
+
+                    <BxButton Label="Add Persona" @onclick="AddNewPersonaAsync"/>
+                </BxLoaderContext>
+            </div>
+        }
+    </div>
+</div>
+
+
+@code {
+    private bool _ascending = true;
+
+    private string? _criteria = null;
+
+    private IEnumerable<Models.Client> _filteredClients = Enumerable.Empty<Models.Client>();
+
+    private Models.Client? _client = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        loadingService.Register("Clients");
+        loadingService.Register("Personas");
+
+        using (loadingService.Show("Clients"))
+        {
+            dataService.SelectionChanged += HandleSelectionChanged;
+            await dataService.LoadAsync(CancellationToken.None);
+            _filteredClients = dataService.Clients;
+        }
+    }
+
+    private void Search()
+    {
+        if (string.IsNullOrWhiteSpace(_criteria)) _filteredClients = dataService.Clients;
+        else _filteredClients = dataService.Clients.Where(c => c.Name is not null && c.Name.ToLowerInvariant().StartsWith(_criteria.ToLowerInvariant()));
+
+        dataService.Selected = _filteredClients.FirstOrDefault();
+    }
+
+    private async Task AddNewClientAsync()
+    {
+        dialogService.Create<EditClientDialog>()
+                .WithTitle("Edit Client")
+                .WithData(new Models.Client() { Id = Guid.NewGuid() })
+                .OnOk(async (result) => await SaveAsync(result.Get<Models.Client>()!))
+            .Show();
+    }
+
+    private async Task EditClientAsync()
+    {
+        dialogService.Create<EditClientDialog>()
+                .WithTitle("Edit Client")
+                .WithData(dataService.Selected)
+                .OnOk(async (result) => await SaveAsync(result.Get<Models.Client>()!))
+            .Show();
+    }
+
+    private async Task SaveAsync(Models.Client client)
+    {
+        using (loadingService.Show("Clients"))
+        {
+            await dataService.SaveAsync(client, CancellationToken.None);
+            Search();            
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        using var loader = loadingService.Show("Clients");
+        await dataService.DeleteAsync(CancellationToken.None);
+        Search();
+    }
+
+    private void ChangeOrder()
+    {
+        _ascending = !_ascending;
+    }
+
+    private IEnumerable<Models.Client> GetClients()
+    {
+        if (_ascending) return _filteredClients.OrderBy(c => c.Name);
+        else return _filteredClients.OrderByDescending(c => c.Name);
+    }
+
+    private async Task HandleSelectionChanged(object? sender, Models.Client? client)
+    {
+        if (client is null) return;
+        
+        using (loadingService.Show("Personas"))
+        {
+            StateHasChanged();
+            await personaDataService.LoadAsync(client.Id, CancellationToken.None);
+        }
+
+        StateHasChanged();
+    }
+
+    private void AddNewPersonaAsync()
+    {
+        personaDataService.AddPersona();
+    }
+
+    private async Task SavePersonaAsync(Models.Persona persona)
+    {
+        if (dataService.Selected is null) return;
+
+        using (loadingService.Show(persona.Id.ToString()))
+        {
+            await personaDataService.SaveAsync(dataService.Selected.Id, persona, CancellationToken.None);            
+        }
+    }
+
+    private async Task DeletePersonaAsync(Models.Persona persona)
+    {
+        if (dataService.Selected is null) return;
+
+        using (loadingService.Show("Personas"))
+        {
+            await personaDataService.DeleteAsync(dataService.Selected.Id, persona, CancellationToken.None);
+        }
+    }
+}

@@ -1,0 +1,69 @@
+﻿@using FakeID.Client.Blazor.Extensions
+@using FakeID.Client.Blazor.Services
+
+@inject IClientDataService DataService
+
+<EditForm EditContext="_editContext">
+    <DataAnnotationsValidator />
+
+    <div class="editclient__container">
+            <BxField Label="Name" Required="true">
+                <BxInputText @bind-Value="_client.Name"></BxInputText>
+            </BxField>
+
+            <div class="editclient__buttons">
+                <BxButton Disabled="@(_editContext.IsValid() || !_editContext.IsModified())" Label="Save" @onclick="SaveAsync"></BxButton>
+                <BxButton Label="Cancel" @onclick="CancelAsync"></BxButton>
+            </div>
+    </div>
+</EditForm>
+
+@code {
+    private EditContext? _editContext;
+    private ValidationMessageStore _store = default!;
+
+    [CascadingParameter(Name="Data")]
+    public required DialogData Data { get; set; }
+
+    [CascadingParameter]
+    public IBxDialog Dialog { get; set; } = default!;
+
+    private Models.Client _client = default!;
+
+    protected override void OnInitialized()
+    {
+        _client = Data.Get<Models.Client>()!;
+        _editContext = new(_client);
+
+        _editContext.OnValidationRequested += HandleValidationRequested;
+        _editContext.OnFieldChanged += HandleFieldChanged;
+
+        _store = new ValidationMessageStore(_editContext);
+    }
+
+    private async Task SaveAsync()
+    {
+        await Dialog.OkAsync(_client);
+    }
+
+    private async Task CancelAsync()
+    {
+        await Dialog.CancelAsync();
+    }
+
+    private void HandleFieldChanged(object? sender, FieldChangedEventArgs args)
+    {
+        _editContext!.Validate();
+    }
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs args)
+    {
+        _store.Clear();
+        if (DataService.Clients.Any(c => c.Name == _client.Name))
+        {
+            _store.Add(_editContext!.Field(nameof(_client.Name)), "Client has already been created");
+        }
+
+        _editContext!.NotifyValidationStateChanged();
+    }
+}

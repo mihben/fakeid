@@ -1,4 +1,6 @@
+using BlazX;
 using FakeID.Client.Blazor;
+using FakeID.Client.Blazor.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using STrain;
@@ -10,7 +12,15 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddHttpClient();
 builder.UseLightinject();
 
-builder.UseRequestRouter(_ => "backend")
-    .AddGenericHttpSender("backend", (options, _) => { options.BaseAddress = new Uri("http://localhost:5100/"); options.Path = "api"; });
+builder.Services
+    .AddBxDialog()
+    .AddBxLoader();
 
-await builder.Build().RunAsync();
+builder.Services.AddSingleton<IClientDataService, ClientDataService>();
+builder.Services.AddSingleton<IPersonaDataService, PersonaDataService>();
+
+builder.UseRequestRouter(_ => "backend")
+    .AddGenericHttpSender("backend", (options, _) => { options.BaseAddress = new Uri("http://localhost:5000/"); options.Path = "api"; });
+
+var app = builder.Build();
+await app.RunAsync();
