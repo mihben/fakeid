@@ -105,7 +105,23 @@ namespace FakeID.Application.Test.Unit
             Assert.False(result.IsValid);
         }
 
-        [Fact(DisplayName = "[UNIT][UPC-007] - Update Persona")]
+        [Theory(DisplayName = "[UNIT][UPC-007] - Username is Empty")]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task UpdatePersonaCommand_ValidateAsync_UsernameIsEmpty(string? username)
+        {
+            // Arrange
+            var sut = new UpdatePersonaCommandValidator();
+
+            // Act
+            var result = await sut.ValidateAsync(new CommandFaker().WithUsername(username).Generate(), default);
+
+            // Assert
+            Assert.False(result.IsValid);
+        }
+
+        [Fact(DisplayName = "[UNIT][UPC-100] - Update Persona")]
         public async Task UpdatePersonaCommand_PerformAsync_UpdatePesona()
         {
             // Arrange
@@ -120,12 +136,13 @@ namespace FakeID.Application.Test.Unit
             // Assert
             var entity = await _fixture.GetPersonaAsync(persona.Id);
             Assert.Equal(entity!.FirstName, persona.FirstName);
+            Assert.Equal(entity!.Username, persona.Username);
             Assert.Equal(entity!.LastName, persona.LastName);
             Assert.Equal(entity!.Email, persona.Email);
             Assert.Equal(entity!.Role, persona.Role);
         }
 
-        [Fact(DisplayName = "[UNIT][UPC-008] - Update not Existing Persona")]
+        [Fact(DisplayName = "[UNIT][UPC-101] - Update not Existing Persona")]
         public async Task UpdatePersonaCommand_PerformAsync_UpdateNotExistingPesona()
         {
             // Arrange
@@ -135,14 +152,41 @@ namespace FakeID.Application.Test.Unit
             // Assert
             await Assert.ThrowsAsync<NotFoundException>(async () => await sut.PerformAsync(new CommandFaker().Generate(), default));
         }
+        [Fact(DisplayName = "[UNIT][UPC-102] - Username has already been exists")]
+        public async Task UpdatePersonaCommand_PerformAsync_UsernameHasAlreadyBeenExists()
+        {
+            // Arrange
+            var sut = _fixture.CreateSUT();
+            var persona = new EntityFaker().Generate();
+
+            await _fixture.InsertAsync(new EntityFaker().WithClient(persona.Client).WithUsername(persona.Username).Generate());
+
+            // Act
+            // Arrange
+            await Assert.ThrowsAsync<VerificationException>(async () => await sut.PerformAsync(new CommandFaker().WithClient(persona.Client.Id).WithUsername(persona.Username).Generate(), default));
+        }
     }
 
     file class EntityFaker : AutoFaker<PersonaEntity>
     {
         public EntityFaker BasedOn(PersonaEntity persona)
         {
-            RuleFor(p => p.Client, persona.Client);
+            WithClient(persona.Client);
             RuleFor(p => p.Id, persona.Id);
+
+            return this;
+        }
+
+        public EntityFaker WithClient(ClientEntity client)
+        {
+            RuleFor(p => p.Client, client);
+
+            return this;
+        }
+
+        public EntityFaker WithUsername(string username)
+        {
+            RuleFor(p => p.Username, username);
 
             return this;
         }
@@ -150,6 +194,12 @@ namespace FakeID.Application.Test.Unit
 
     file class CommandFaker : AutoFaker<UpdatePersonaCommand>
     {
+        public CommandFaker WithClient(Guid client)
+        {
+            RuleFor(c => c.Client, client);
+
+            return this;
+        }
         public CommandFaker WithEmptyClient()
         {
             RuleFor(c => c.Client, Guid.Empty);
@@ -191,6 +241,13 @@ namespace FakeID.Application.Test.Unit
 
             return this;
         }
+
+        public CommandFaker WithUsername(string? username)
+        {
+            RuleFor(c => c.Username, username);
+
+            return this;
+        }
     }
 
     public static class UpdatePersonaCommandTestExtensions
@@ -201,6 +258,7 @@ namespace FakeID.Application.Test.Unit
             {
                 Client = persona.Client.Id,
                 Persona = persona.Id,
+                Username = persona.Username,
                 FirstName = persona.FirstName,
                 LastName = persona.LastName,
                 Email = persona.Email,

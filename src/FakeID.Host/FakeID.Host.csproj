@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="LightInject.Microsoft.Hosting" Version="2.1.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
@@ -23,6 +19,10 @@
   <ItemGroup>
     <ProjectReference Include="..\FakeID.Api\FakeID.Api.csproj" />
     <ProjectReference Include="..\FakeID.Application\FakeID.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Middlewares\" />
   </ItemGroup>
 
 </Project>

@@ -1,3 +1,4 @@
+using FakeID.Application.Services;
 using FakeID.Host.Wireup;
 using Serilog;
 using STrain.CQS.NetCore;
@@ -29,6 +30,8 @@ app.UseExceptionHandler();
 app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader());
 
 app.UseAuthorization();
+
+app.MapGet("/authorize", async request => await request.RequestServices.GetRequiredService<IOauthService>().AuthorizeAsync(request.RequestAborted));
 
 app.MapControllers();
 app.MapGenericRequestController();

@@ -3,6 +3,7 @@ using FakeID.Application.Handlers;
 using FakeID.Application.Performers;
 using STrain;
 using STrain.CQS.NetCore.Builders;
+using STrain.CQS.NetCore.LigtInject;
 
 namespace FakeID.Host.Wireup
 {
@@ -25,6 +26,12 @@ namespace FakeID.Host.Wireup
             builder.AddPerformer<ICommandPerformer<CreatePersonaCommand>, PersonaPerformers>();
             builder.AddPerformer<ICommandPerformer<UpdatePersonaCommand>, PersonaPerformers>();
             builder.AddPerformer<ICommandPerformer<DeletePersonaCommand>, PersonaPerformers>();
+
+            builder.AddRequestRouter(_ => "__", builder => builder.AddHttpSender("__", (options, _) =>
+            {
+                options.BaseAddress = new Uri("http://localhost:5000/");
+                options.Path = "api";
+            }, builder => builder.UseGenericBodyParameterBinder().UseGenericQueryParameterBinder().UseGenericMethodBinder().UseGenericHeaderParameterBinder().UseResponseReaders().UseGenericRouteBinder().UseDefaultErrorHandler()));
         }
     }
 }

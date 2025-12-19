@@ -45,6 +45,10 @@ namespace FakeID.Application.Contexts
             builder.Property(e => e.Id)
                 .HasColumnName("id");
 
+            builder.Property(e => e.Username)
+                .HasColumnName("username")
+                .IsRequired();
+
             builder.Property(e => e.FirstName)
                 .HasColumnName("first_name")
                 .IsRequired();

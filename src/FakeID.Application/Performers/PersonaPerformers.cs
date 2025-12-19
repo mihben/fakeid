@@ -10,7 +10,8 @@ namespace FakeID.Application.Performers
     public class PersonaPerformers : IQueryPerformer<GetPersonasQuery, IEnumerable<GetPersonasQuery.Result>>,
         ICommandPerformer<CreatePersonaCommand>,
         ICommandPerformer<UpdatePersonaCommand>,
-        ICommandPerformer<DeletePersonaCommand>
+        ICommandPerformer<DeletePersonaCommand>,
+        IQueryPerformer<GetPersonasByClientQuery, IEnumerable<GetPersonasByClientQuery.Result>>
     {
         private readonly ApplicationContext _context;
         private readonly ILogger<PersonaPerformers> _logger;
@@ -45,13 +46,15 @@ namespace FakeID.Application.Performers
 
             try
             {
-                var client = await _context.Clients.FindAsync([command.Client], cancellationToken).ConfigureAwait(false);
+                var client = await _context.Clients.Include(c => c.Personas).SingleOrDefaultAsync(c => c.Id == command.Client, cancellationToken).ConfigureAwait(false);
                 if (client is null) throw Exceptions.Clients.NotFound;
+                if (client.Personas.Any(p => p.Username == command.Username)) throw Exceptions.Personas.Conflict(command.Username);
 
                 await _context.Personas.AddAsync(new PersonaEntity
                 {
                     Client = client,
                     Id = command.Id,
+                    Username = command.Username,
                     FirstName = command.FirstName,
                     LastName = command.LastName,
                     Email = command.Email,
@@ -76,9 +79,14 @@ namespace FakeID.Application.Performers
 
             try
             {
-                var persona = await _context.Personas.FindAsync([command.Persona], cancellationToken).ConfigureAwait(false);
+                var client = await _context.Clients.Include(c => c.Personas).SingleOrDefaultAsync(c => c.Id == command.Client, cancellationToken).ConfigureAwait(false);
+                if (client is null) throw Exceptions.Clients.NotFound;
+                if (client.Personas.Any(p => p.Id != command.Persona && p.Username == command.Username)) throw Exceptions.Personas.Conflict(command.Username);
+
+                var persona = client.Personas.SingleOrDefault(p => p.Id == command.Persona);
                 if (persona is null) throw Exceptions.Personas.NotFound;
 
+                persona.Username = command.Username;
                 persona.FirstName = command.FirstName;
                 persona.LastName = command.LastName;
                 persona.Email = command.Email;
@@ -119,6 +127,22 @@ namespace FakeID.Application.Performers
                 await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
                 throw;
             }
+        }
+
+        public async Task<IEnumerable<GetPersonasByClientQuery.Result>> PerformAsync(GetPersonasByClientQuery query, CancellationToken cancellationToken)
+        {
+            _logger.LogDebug("Getting personas for {Client} client", query.Client);
+
+            var personas = await _context.Personas.Where(p => p.Client.Name == query.Client).ToListAsync().ConfigureAwait(false);
+
+            return personas.ConvertAll(p => new GetPersonasByClientQuery.Result
+            {
+                Id = p.Id,
+                FirstName = p.FirstName,
+                LastName = p.LastName,
+                Email = p.Email,
+                Role = p.Role
+            });
         }
     }
 }

@@ -7,6 +7,7 @@ namespace FakeID.Api
     {
         public Guid Client { get; init; }
         public Guid Persona { get; init; }
+        public required string Username { get; init; }
         public required string FirstName { get; init; }
         public required string LastName { get; init; }
         public required string Email { get; init; }
@@ -19,6 +20,7 @@ namespace FakeID.Api
         {
             RuleFor(c => c.Client).NotEmpty();
             RuleFor(c => c.Persona).NotEmpty();
+            RuleFor(c => c.Username).NotEmpty();
             RuleFor(c => c.FirstName).NotEmpty();
             RuleFor(c => c.LastName).NotEmpty();
             RuleFor(c => c.Email).NotEmpty();

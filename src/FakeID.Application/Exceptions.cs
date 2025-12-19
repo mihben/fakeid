@@ -17,6 +17,11 @@ namespace FakeID.Application
         public static class Personas
         {
             public static NotFoundException NotFound = new("Persona does not exist");
+
+            public static VerificationException Conflict(string username)
+            {
+                return new VerificationException("PRS001", "Already Exists", $"Persona with username {username} has already been created");
+            }
         }
     }
 }

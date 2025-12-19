@@ -44,7 +44,7 @@ namespace FakeID.Application.Test.Unit
             Assert.False(result.IsValid);
         }
 
-        [Fact(DisplayName = "[UNIT][UCC-003] - Update Client")]
+        [Fact(DisplayName = "[UNIT][UCC-100] - Update Client")]
         public async Task UpdateClientCommandTest_PerformAsync_UpdateClient()
         {
             // Arrange
@@ -60,7 +60,7 @@ namespace FakeID.Application.Test.Unit
             Assert.Equal(command.Name, (await _fixture.GetAsync(command.Id))?.Name);
         }
 
-        [Fact(DisplayName = "[UNIT][UCC-004] - Client does not exist")]
+        [Fact(DisplayName = "[UNIT][UCC-101] - Client does not exist")]
         public async Task UpdateClientCommandTest_PerformAsync_ClientDoesNotExist()
         {
             // Arrange
@@ -72,7 +72,7 @@ namespace FakeID.Application.Test.Unit
             await Assert.ThrowsAsync<NotFoundException>(async () => await sut.PerformAsync(command, default));
         }
 
-        [Fact(DisplayName = "[UNIT][UCC-005] - Client has already been added")]
+        [Fact(DisplayName = "[UNIT][UCC-102] - Client has already been added")]
         public async Task UpdateClientCommandTest_PerformAsync_ClientHasAlreadyBeenAdded()
         {
             // Arrange
