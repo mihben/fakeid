@@ -5,7 +5,12 @@ namespace FakeID.Api
 {
     public record GetPersonasByClientQuery : Query<IEnumerable<GetPersonasByClientQuery.Result>>
     {
-        public required string Client { get; init; }
+        public string Client { get; }
+
+        public GetPersonasByClientQuery(string client)
+        {
+            Client = client;
+        }
 
         public record Result
         {

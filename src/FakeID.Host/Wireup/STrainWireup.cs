@@ -26,6 +26,7 @@ namespace FakeID.Host.Wireup
             builder.AddPerformer<ICommandPerformer<CreatePersonaCommand>, PersonaPerformers>();
             builder.AddPerformer<ICommandPerformer<UpdatePersonaCommand>, PersonaPerformers>();
             builder.AddPerformer<ICommandPerformer<DeletePersonaCommand>, PersonaPerformers>();
+            builder.AddPerformer<IQueryPerformer<GetPersonasByClientQuery, IEnumerable<GetPersonasByClientQuery.Result>>, PersonaPerformers>();
 
             builder.AddRequestRouter(_ => "__", builder => builder.AddHttpSender("__", (options, _) =>
             {

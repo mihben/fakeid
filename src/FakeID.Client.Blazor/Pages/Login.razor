@@ -1,7 +1,43 @@
 ﻿@page "/login"
+@using FakeID.Api
+@using FakeID.Client.Blazor.Components
+@using STrain
 
-<h3>Login</h3>
+@inject IRequestSender Sender
+@inject NavigationManager Navigation
+
+<div class="container">
+    <span class="title">Login</span>
+
+    <div class="personas">
+        @foreach (var persona in _personas)
+        {
+            <PersonaComponent Persona="@persona" Selected="SelectAsync"></PersonaComponent>
+        }
+    </div>
+</div>
 
 @code {
+    private IEnumerable<GetPersonasByClientQuery.Result> _personas = [];
 
+    [SupplyParameterFromQuery(Name = "response_type")]
+    public required string ResponseType { get; set; }
+    [SupplyParameterFromQuery(Name = "client_id")]
+    public required string Client { get; set; }
+    [SupplyParameterFromQuery(Name = "redirect_uri")]
+    public required string RedirectUri { get; set; }
+    [SupplyParameterFromQuery(Name = "state")]
+    public required string State { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _personas = await Sender.GetAsync<GetPersonasByClientQuery, IEnumerable<GetPersonasByClientQuery.Result>>(new GetPersonasByClientQuery(Client), default);
+        StateHasChanged();
+    }
+
+    private async Task SelectAsync(GetPersonasByClientQuery.Result persona)
+    {
+        Navigation.NavigateTo($"http://localhost:5000/authorize?response_type={ResponseType}&client_id={Client}&redirect_uri={RedirectUri}&state={State}&user={persona.Id}", true);
+    }
 }

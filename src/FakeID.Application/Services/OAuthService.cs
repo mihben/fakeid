@@ -41,17 +41,17 @@ namespace FakeID.Application.Services
 
             var state = _accessor.HttpContext.Request.Query.Read("state");
 
-            var user = _accessor.HttpContext.Request.Headers.Read("user");
+            var user = _accessor.HttpContext.Request.Query.Read("user", false);
             if (string.IsNullOrEmpty(user))
             {
                 _logger.LogDebug("User not found. Redirect to login page");
-                _accessor.HttpContext.Response.Redirect(_options.Value.LoginEndpoint.AbsoluteUri);
+                _accessor.HttpContext.Response.Redirect($"{_options.Value.LoginEndpoint.AbsoluteUri}?response_type={responseType}&client_id={clientId}&redirect_uri={redirectUri}&state={state}");
             }
             else
             {
                 _logger.LogDebug("User found. Redirect to application");
 
-                var personas = await _sender.GetAsync<GetPersonasByClientQuery, IEnumerable<GetPersonasByClientQuery.Result>>(new GetPersonasByClientQuery { Client = clientId! }, cancellationToken);
+                var personas = await _sender.GetAsync<GetPersonasByClientQuery, IEnumerable<GetPersonasByClientQuery.Result>>(new GetPersonasByClientQuery(clientId!), cancellationToken);
 
                 var code = personas.Single(p => p.Id == Guid.Parse(user)).EncodeCode("fakeid", clientId, _clock.UtcNow.DateTime);
 
@@ -62,16 +62,9 @@ namespace FakeID.Application.Services
 
     file static class OAuthServiceExtensions
     {
-        public static string? Read(this IHeaderDictionary headers, string key)
+        public static string? Read(this IQueryCollection parameters, string key, bool mandatory = true)
         {
-            if (!headers.TryGetValue(key, out var values)) return null;
-
-            return values.FirstOrDefault();
-        }
-
-        public static string? Read(this IQueryCollection parameters, string key)
-        {
-            if (!parameters.TryGetValue(key, out var values)) throw new ArgumentNullException(key);
+            if (!parameters.TryGetValue(key, out var values) && mandatory) throw new ArgumentNullException(key);
 
             return values.FirstOrDefault();
         }

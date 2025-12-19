@@ -1,4 +1,5 @@
 ﻿using FakeID.Application.Contexts;
+using FakeID.Application.Options;
 using FakeID.Application.Services;
 using FakeID.Host.HostServices;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,11 @@ namespace FakeID.Host.Wireup
             builder.Services.AddTransient<IOauthService, OAuthService>();
 
             builder.Services.AddTransient<ISystemClock, SystemClock>();
+
+            builder.Services.AddOptions<ApplicationOptions>()
+                .BindConfiguration("Application")
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
         }
     }
 }

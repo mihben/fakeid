@@ -1,42 +1,20 @@
-﻿div.persona__container {
+﻿div.content {
     display: grid;
-    grid-template-rows: max-content max-content min-content;
-    row-gap: 1.2rem;
+    grid-template-rows: min-content min-content;
 
-    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+    row-gap: 1rem;
 
-    padding: .4rem;
-
-    border-radius: 4px;
+    justify-items: center;
 }
 
-    div.persona__container:focus-within {
-        box-shadow: rgba(3, 102, 214, 0.3) 0px 0px 0px 2px;
-    }
-
-div.persona__data {
+div.main-data {
     display: grid;
-    grid-template-rows: auto auto min-content;
-    row-gap: .4rem;
+    grid-template-rows: min-content min-content;
+
+    justify-items: center;
 }
 
-div.persona__name {
-    display: grid;
-    grid-template-columns: auto auto;
-    column-gap: .4rem;
-}
-
-div.persona__buttons {
-    display: grid;
-    grid-template-columns: max-content max-content;
-    column-gap: .2rem;
-
-    justify-content: end;
-}
-
-span.persona__title {
-    justify-self: center;
-
+span.name {
     font-size: 1.2rem;
     font-weight: bold;
 }

@@ -78,7 +78,7 @@
                     <div class="personas">
                         @foreach (var persona in personaDataService.Personas)
                         {
-                            <PersonaComponent Persona="@persona" OnSave="SavePersonaAsync" OnDelete="DeletePersonaAsync"></PersonaComponent>
+                            <PersonaEditorComponent Persona="@persona" OnSave="SavePersonaAsync" OnDelete="DeletePersonaAsync"></PersonaEditorComponent>
                         }
                     </div>
 
