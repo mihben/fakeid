@@ -31,6 +31,7 @@ namespace FakeID.Application.Performers
             return client.ConvertAll(c => new GetPersonasQuery.Result
             {
                 Id = c.Id,
+                Username = c.Username,
                 FirstName = c.FirstName,
                 LastName = c.LastName,
                 Email = c.Email,

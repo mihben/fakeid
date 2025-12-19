@@ -6,6 +6,8 @@ namespace FakeID.Client.Blazor.Models
     {
         public Guid Id { get; init; }
         [Required]
+        public string? Username { get; set; }
+        [Required]
         public string? FirstName { get; set; }
         [Required]
         public string? LastName { get; set; }

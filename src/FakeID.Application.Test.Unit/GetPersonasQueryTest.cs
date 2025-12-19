@@ -43,6 +43,7 @@ namespace FakeID.Application.Test.Unit
 
             // Assert
             Assert.Single(result, p => p.Id == persona.Id &&
+                                    p.Username == persona.Username &&
                                     p.FirstName == persona.FirstName &&
                                     p.LastName == persona.LastName &&
                                     p.Email == persona.Email &&

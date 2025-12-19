@@ -33,6 +33,7 @@ namespace FakeID.Client.Blazor.Services
             Personas = [.. result!.Select(r => new Models.Persona
             {
                 Id = r.Id,
+                Username = r.Username,
                 FirstName = r.FirstName,
                 LastName = r.LastName,
                 Role = r.Role,
@@ -54,6 +55,7 @@ namespace FakeID.Client.Blazor.Services
                 {
                     Client = client,
                     Id = persona.Id,
+                    Username = persona.Username!,
                     FirstName = persona.FirstName!,
                     LastName = persona.LastName!,
                     Email = persona.Email!,
@@ -66,6 +68,7 @@ namespace FakeID.Client.Blazor.Services
                 {
                     Client = client,
                     Persona = persona.Id,
+                    Username = persona.Username!,
                     FirstName = persona.FirstName!,
                     LastName = persona.LastName!,
                     Email = persona.Email!,

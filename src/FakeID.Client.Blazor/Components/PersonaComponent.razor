@@ -11,6 +11,10 @@
 
         <BxPanel Collapsable="true" Title="@GetTitle()">
             <div class="persona__data">
+                <BxField Label="Username" Required="true">
+                    <BxInputText @bind-Value="Persona.Username"></BxInputText>
+                </BxField>
+
                 <div class="persona__name">
                     <BxField Label="First Name" Required="true">
                         <BxInputText @bind-Value="Persona.FirstName"></BxInputText>

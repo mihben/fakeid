@@ -51,14 +51,7 @@ namespace FakeID.Application.Services
             {
                 _logger.LogDebug("User found. Redirect to application");
 
-                //var personas = await _sender.GetAsync<GetPersonasQuery, IEnumerable<GetPersonasQuery.Result>>(new GetPersonasQuery(clientId), cancellationToken);
-                var personas = new List<GetPersonasQuery.Result> { new() {
-                                            Id = Guid.Parse("8541aabd-404b-4901-b0d9-5d8b8ef13542"),
-                                            FirstName = "Teszt",
-                                            LastName = "Elek",
-                                            Role = "tester",
-                                            Email = "tesztelek@teszt.com"
-                                } };
+                var personas = await _sender.GetAsync<GetPersonasByClientQuery, IEnumerable<GetPersonasByClientQuery.Result>>(new GetPersonasByClientQuery { Client = clientId! }, cancellationToken);
 
                 var code = personas.Single(p => p.Id == Guid.Parse(user)).EncodeCode("fakeid", clientId, _clock.UtcNow.DateTime);
 
@@ -107,7 +100,7 @@ namespace FakeID.Application.Services
             return builder;
         }
 
-        public static string EncodeCode(this GetPersonasQuery.Result persona, string issuer, string audience, DateTime now)
+        public static string EncodeCode(this GetPersonasByClientQuery.Result persona, string issuer, string audience, DateTime now)
         {
             var claims = new[]
             {

@@ -135,13 +135,13 @@ namespace FakeID.Application.Test.Unit
         {
             // Arrange
             var sut = CreateSUT();
-            var persona = new AutoFaker<GetPersonasQuery.Result>().Generate();
+            var persona = new AutoFaker<GetPersonasByClientQuery.Result>().Generate();
             var redirectUri = new Faker().Internet.UrlWithPath();
             var state = new Faker().Random.Guid();
             var clientId = new Faker().Random.String();
             var context = new HttpContextFaker().RedirectUri(redirectUri).User(persona.Id).ClientId(clientId).State(state).Generate();
 
-            _senderMock.SetupQuery<GetPersonasQuery, IEnumerable<GetPersonasQuery.Result>>().ReturnsAsync([persona]);
+            _senderMock.SetupQuery<GetPersonasByClientQuery, IEnumerable<GetPersonasByClientQuery.Result>>().ReturnsAsync([persona]);
             _accessorMock.SetupHttpContext(context);
 
             // Act
@@ -167,7 +167,7 @@ namespace FakeID.Application.Test.Unit
             return mock.Setup(m => m.SendAsync<TQuery, TResponse>(It.IsAny<TQuery>(), It.IsAny<CancellationToken>()));
         }
 
-        public static string Encode(this GetPersonasQuery.Result persona, string issuer, string audience, DateTime now)
+        public static string Encode(this GetPersonasByClientQuery.Result persona, string issuer, string audience, DateTime now)
         {
             var claims = new[]
             {
