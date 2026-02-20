@@ -5,7 +5,13 @@
     row-gap: 1rem;
 
     justify-items: center;
+
+    cursor: pointer;
 }
+
+    div.content:has(:hover) {
+        background: rgb(0, 38, 255, 0.31);
+    }
 
 div.main-data {
     display: grid;

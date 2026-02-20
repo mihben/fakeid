@@ -20,7 +20,7 @@ builder.Services.AddSingleton<IClientDataService, ClientDataService>();
 builder.Services.AddSingleton<IPersonaDataService, PersonaDataService>();
 
 builder.UseRequestRouter(_ => "backend")
-    .AddGenericHttpSender("backend", (options, _) => { options.BaseAddress = new Uri("http://localhost:5000/"); options.Path = "api"; });
+    .AddGenericHttpSender("backend", (options, configuration) => configuration.Bind("Router:Backend", options));
 
 var app = builder.Build();
 await app.RunAsync();

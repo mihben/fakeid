@@ -31,6 +31,7 @@ app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader());
 
 app.UseAuthorization();
 
+app.MapGet("/.well-known/openid-configuration", async request => await request.RequestServices.GetRequiredService<IOauthService>().GetMetadataAsync(request.RequestAborted));
 app.MapGet("/authorize", async request => await request.RequestServices.GetRequiredService<IOauthService>().AuthorizeAsync(request.RequestAborted));
 
 app.MapControllers();

@@ -8,6 +8,8 @@ using Microsoft.IdentityModel.Tokens;
 using STrain;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace FakeID.Application.Services
 {
@@ -57,6 +59,43 @@ namespace FakeID.Application.Services
 
                 _accessor.HttpContext.Response.Redirect(new UriBuilder(redirectUri).Code(code).State(state).Uri.AbsoluteUri);
             }
+        }
+
+
+        public async Task GetMetadataAsync(CancellationToken cancellationToken)
+        {
+            var context = _accessor.HttpContext;
+
+            context.Response.StatusCode = StatusCodes.Status200OK;
+            context.Response.ContentType = "application/json";
+            await JsonSerializer.SerializeAsync(context.Response.Body, new Metadata($"{context.Request.Scheme}://{context.Request.Host.Value}/"), cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    file record Metadata
+    {
+        private readonly string _uri;
+
+        [JsonPropertyName("issuer")]
+        public string Issuer => _uri;
+        [JsonPropertyName("authorization_endpoint")]
+        public string AuthorizationEndpoint => $"{_uri}authorize";
+        [JsonPropertyName("token_endpoint")]
+        public string TokenEndpoint => $"{_uri}token";
+        [JsonPropertyName("userinfo_endpoint")]
+        public string UserinfoEndpoint => $"{_uri}userinfo";
+        [JsonPropertyName("jwsk_uri")]
+        public string JwskUri => $"{_uri}.well-known/jwsk.json";
+        [JsonPropertyName("scopes_supported")]
+        public IEnumerable<string> ScopesSupported => ["openid", "profile", "email"];
+        [JsonPropertyName("response_types_supported")]
+        public IEnumerable<string> ResponseTypesSupported => ["code"];
+        [JsonPropertyName("token_endpoint_auth_methods_supported")]
+        public IEnumerable<string> TokenEndpointAuthMethodsSupported => ["client_secret_basic"];
+
+        public Metadata(string uri)
+        {
+            _uri = uri;
         }
     }
 

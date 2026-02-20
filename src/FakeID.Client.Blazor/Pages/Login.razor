@@ -1,10 +1,13 @@
 ﻿@page "/login"
 @using FakeID.Api
 @using FakeID.Client.Blazor.Components
+@using Microsoft.Extensions.Options
 @using STrain
+@using STrain.CQS.Http.RequestSending
 
 @inject IRequestSender Sender
 @inject NavigationManager Navigation
+@inject IOptionsSnapshot<HttpRequestSenderOptions> OptionsSnapshot
 
 <div class="container">
     <span class="title">Login</span>
@@ -38,6 +41,8 @@
 
     private async Task SelectAsync(GetPersonasByClientQuery.Result persona)
     {
-        Navigation.NavigateTo($"http://localhost:5000/authorize?response_type={ResponseType}&client_id={Client}&redirect_uri={RedirectUri}&state={State}&user={persona.Id}", true);
+        var options = OptionsSnapshot.Get("backend");
+
+        Navigation.NavigateTo($"{options.BaseAddress}authorize?response_type={ResponseType}&client_id={Client}&redirect_uri={RedirectUri}&state={State}&user={persona.Id}", true);
     }
 }
